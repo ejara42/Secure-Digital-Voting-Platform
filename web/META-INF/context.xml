@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context path="">
+  <Resource auth="Container" driverClassName="org.postgresql.Driver" maxIdle="10" maxTotal="20" maxWaitMillis="-1" name="jdbc/nebe_online_election" password="@eyasu51#" type="javax.sql.DataSource" url="jdbc:postgresql://localhost:5432/nebe_online_election" username="postgres"/>
+</Context>

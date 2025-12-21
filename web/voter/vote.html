@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cast Vote</title>
+    <link rel="stylesheet" href="../Assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="../Assets/js/auth.js"></script>
+    <script src="../Assets/js/app.js"></script>
+</head>
+<body>
+    <header class="app-bar">
+        <h1><img src="../Assets/images/logo.png" alt="NEBE Logo" class="logo"> Cast Vote</h1>
+        <i class="fas fa-bars hamburger"></i>
+    </header>
+    <nav class="sidebar" aria-label="Voter Navigation">
+        <!-- Same as dashboard -->
+    </nav>
+    <main role="main">
+        <div class="card">
+            <h3>Select Candidate</h3>
+            <form id="voteForm" action="/vote" method="post" onsubmit="return confirmVote()">
+                <!-- Dynamic from backend -->
+                <label><input type="radio" name="candidateId" value="1" required> Candidate 1 (Party A)</label>
+                <label><input type="radio" name="candidateId" value="2" required> Candidate 2 (Party B)</label>
+                <button type="submit">Submit Anonymous Vote</button>
+            </form>
+            <p>Note: One vote per voter, anonymous, during active period (NEBE).</p>
+        </div>
+    </main>
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <h3>Confirm Vote</h3>
+            <p>Your selection is final and anonymous.</p>
+            <button onclick="document.getElementById('voteForm').submit()">Confirm</button>
+            <button data-modal-close>Cancel</button>
+        </div>
+    </div>
+</body>

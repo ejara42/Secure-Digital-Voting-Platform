@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Logs - Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../Assets/css/styles.css">
+    <script src="../Assets/js/admin.js"></script>
+    <script src="../Assets/js/app.js"></script>
+</head>
+<body>
+    <header class="app-bar">
+        <h1><img src="../Assets/images/logo.png" alt="NEBE Logo" class="logo"> Admin - Audit Logs</h1>
+        <i class="fas fa-bars hamburger"></i>
+        <div><i class="fas fa-user" aria-label="Profile"></i> Admin <a href="../Public/logout.html"><i class="fas fa-sign-out-alt"></i></a></div>
+    </header>
+    <nav class="sidebar" aria-label="Admin Navigation">
+        <ul>
+            <li><a href="dashboard.html" title="Dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            <li><a href="manageElections.html" title="Manage Elections"><i class="fas fa-vote-yea"></i> Manage Elections</a></li>
+            <li><a href="manageCandidates.html" title="Manage Candidates"><i class="fas fa-users"></i> Manage Candidates</a></li>
+            <li><a href="results.html" title="Results"><i class="fas fa-chart-bar"></i> Results</a></li>
+            <li><a href="auditLogs.html" class="active" title="Audit Logs"><i class="fas fa-file-alt"></i> Audit Logs</a></li>
+        </ul>
+    </nav>
+    <main role="main">
+        <h2>Audit Logs (NEBE Compliant)</h2>
+        <p>Non-identifiable logs for system activities.</p>
+        <div id="logs-container" class="grid"></div>
+        <button onclick="exportReport()">Export Logs</button>
+    </main>
+</body>

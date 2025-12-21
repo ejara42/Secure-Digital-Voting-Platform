@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Elections</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../Assets/css/styles.css">
+    <script src="../Assets/js/admin.js"></script>
+    <script src="../Assets/js/app.js"></script>
+</head>
+<body>
+    <header class="app-bar">
+        <h1><img src="../Assets/images/logo.png" alt="NEBE Logo" class="logo"> Manage Elections</h1>
+        <i class="fas fa-bars hamburger"></i>
+        <div><i class="fas fa-user"></i> Admin <a href="../Public/logout.html"><i class="fas fa-sign-out-alt"></i></a></div>
+    </header>
+    <nav class="sidebar" aria-label="Admin Navigation">
+        <!-- Same as above -->
+    </nav>
+    <main role="main">
+        <h2>Manage Elections (Timed & Secure)</h2>
+        <button data-modal-open="addElectionModal">Add Election</button>
+        <div id="elections-list" class="grid"></div>
+    </main>
+    <div id="addElectionModal" class="modal">
+        <div class="modal-content">
+            <h3>Add Election</h3>
+            <form action="/admin/elections" method="post">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+                <label for="startDate">Start Date:</label>
+                <input type="date" id="startDate" name="startDate" required>
+                <label for="endDate">End Date:</label>
+                <input type="date" id="endDate" name="endDate" required>
+                <button type="submit">Save</button>
+                <button data-modal-close>Cancel</button>
+            </form>
+        </div>
+    </div>
+</body>

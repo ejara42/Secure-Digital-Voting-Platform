@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voter Registration</title>
+    <link rel="stylesheet" href="../Assets/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="../Assets/js/auth.js"></script>
+    <script src="../Assets/js/app.js"></script>
+</head>
+<body>
+    <header class="app-bar">
+        <h1><img src="../Assets/images/logo.png" alt="NEBE Logo" class="logo"> Voter Registration</h1>
+    </header>
+    <main role="main" style="margin-left: 0;">
+        <div class="card" style="max-width: 400px; margin: auto;">
+            <form id="voterRegisterForm" action="/register/voter" method="post" onsubmit="return validateRegistration('voterRegisterForm')">
+                <label for="voterId">Unique Voter ID (NEBE):</label>
+                <input type="text" id="voterId" name="voterId" required pattern="[A-Z0-9]{10}">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+                <label for="age">Age (18+):</label>
+                <input type="number" id="age" name="age" required min="18">
+                <button type="submit">Register</button>
+            </form>
+        </div>
+    </main>
+</body>
