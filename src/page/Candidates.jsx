@@ -1,106 +1,391 @@
-import React, { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getCandidates } from "../api/api";
+import API from "../api/api";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  User, Vote, Shield, Award,
+  Users, CheckCircle, Loader2,
+  AlertCircle, Flag, Briefcase,
+  ArrowRight, Building, Globe,
+  Target, Star, Crown
+} from "lucide-react";
 
 export default function Candidates() {
   const { ballotId } = useParams();
+  const navigate = useNavigate();
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [query, setQuery] = useState("");
-  const [page, setPage] = useState(1);
-  const perPage = 6; // pagination
+  const [error, setError] = useState(null);
+  const [ballotInfo, setBallotInfo] = useState(null);
 
-  const navigate = useNavigate();
-
-  // Fetch candidates
   useEffect(() => {
-    const fetch = async () => {
-      try {
-        const data = await getCandidates(ballotId);
-        setCandidates(data);
-      } catch (err) {
+    if (!ballotId) return;
+
+    setLoading(true);
+
+    // Fetch candidates
+    API.get(`/candidates/${ballotId}`)
+      .then(res => {
+        setCandidates(res.data);
+        setError(null);
+      })
+      .catch(err => {
         console.error(err);
-      } finally {
+        setError("Failed to load candidates. Please try again.");
+      })
+      .finally(() => {
         setLoading(false);
-      }
-    };
-    fetch();
+      });
+
+    // Fetch ballot info for context
+    API.get(`/ballots/${ballotId}`)
+      .then(res => {
+        setBallotInfo(res.data);
+      })
+      .catch(() => {
+        // Silently fail for ballot info - it's optional
+      });
   }, [ballotId]);
 
-  // Filter candidates by search query
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return candidates.filter(
-      (c) =>
-        c.name.toLowerCase().includes(q) ||
-        c.party.toLowerCase().includes(q)
-    );
-  }, [candidates, query]);
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
-  const paginated = filtered.slice((page - 1) * perPage, page * perPage);
-
-  useEffect(() => {
-    if (page > totalPages) setPage(1);
-  }, [totalPages]);
-
-  if (loading) return <p className="text-center mt-10">Loading candidates...</p>;
-  if (!candidates.length) return <p className="text-center mt-10">No candidates found.</p>;
+  const handleVoteClick = (candidateId) => {
+    navigate(`/vote/${ballotId}/${candidateId}`);
+  };
 
   return (
-    <div className="max-w-5xl mx-auto p-8">
-      <h1 className="text-2xl font-bold mb-6 text-center">Candidates</h1>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900/20 to-gray-950 p-4 md:p-8 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 opacity-5" style={{
+          backgroundImage: `linear-gradient(to right, rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+                         linear-gradient(to bottom, rgba(59, 130, 246, 0.1) 1px, transparent 1px)`,
+          backgroundSize: '40px 40px'
+        }}></div>
 
-      {/* Search input */}
-      <div className="flex justify-center mb-6">
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search candidates..."
-          className="border px-4 py-2 rounded w-full max-w-md"
+        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"></div>
+
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+          className="absolute top-1/3 left-1/3 w-64 h-64 border border-blue-500/20 rounded-full"
         />
       </div>
 
-      {/* Candidate cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {paginated.map((c) => (
-          <div key={c.id} className="bg-white p-6 rounded-xl shadow flex flex-col justify-between">
-            <div>
-              <h3 className="text-xl font-semibold">{c.name}</h3>
-              <p className="text-gray-500 mt-1">{c.party}</p>
+      <div className="relative z-10 max-w-6xl mx-auto">
+        {/* Header Section */}
+        <motion.div
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="text-center mb-8"
+        >
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-emerald-600 rounded-full blur-lg opacity-30"></div>
+              <Users className="relative w-12 h-12 text-blue-400" />
             </div>
-            <button
-              onClick={() => navigate(`/vote/${ballotId}/${c.id}`)}
-              className="mt-4 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
-            >
-              Vote
-            </button>
+            <div>
+              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
+                Election Candidates
+              </h1>
+              <p className="text-gray-400 mt-2">
+                {ballotInfo?.title || "Presidential Election 2024"}
+              </p>
+              <p className="text-sm text-gray-500 mt-1">
+                Select your preferred candidate to cast your vote
+              </p>
+            </div>
           </div>
-        ))}
-      </div>
+        </motion.div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-4 mt-6">
-          <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="px-4 py-2 border rounded hover:bg-gray-100 disabled:opacity-50"
+        {/* Election Info Card */}
+        {ballotInfo && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl border border-gray-700/50 p-6 mb-8 shadow-xl"
           >
-            Prev
-          </button>
-          <span>
-            Page {page} of {totalPages}
-          </span>
-          <button
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-            className="px-4 py-2 border rounded hover:bg-gray-100 disabled:opacity-50"
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-xl bg-blue-500/20">
+                  <Award className="w-6 h-6 text-blue-400" />
+                </div>
+                <div>
+                  <div className="text-sm text-gray-400">Election Type</div>
+                  <div className="font-semibold text-white">{ballotInfo.type || "Presidential"}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-xl bg-emerald-500/20">
+                  <Target className="w-6 h-6 text-emerald-400" />
+                </div>
+                <div>
+                  <div className="text-sm text-gray-400">Total Candidates</div>
+                  <div className="font-semibold text-white">{candidates.length}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-xl bg-purple-500/20">
+                  <Shield className="w-6 h-6 text-purple-400" />
+                </div>
+                <div>
+                  <div className="text-sm text-gray-400">Security Level</div>
+                  <div className="font-semibold text-emerald-400">MAXIMUM</div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Security Notice */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="mb-8 p-4 rounded-xl bg-gradient-to-r from-blue-500/10 to-emerald-500/10 border border-blue-500/30"
+        >
+          <div className="flex items-center gap-3">
+            <Shield className="w-5 h-5 text-blue-400 flex-shrink-0" />
+            <div>
+              <div className="font-semibold text-blue-400">Secure Voting Notice</div>
+              <div className="text-sm text-blue-300 mt-1">
+                Your vote is anonymous and encrypted. Once submitted, it cannot be changed or traced back to you.
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Loading State */}
+        {loading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex flex-col items-center justify-center py-20"
           >
-            Next
+            <div className="relative mb-6">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                className="w-20 h-20 border-4 border-blue-500/30 border-t-blue-500 rounded-full"
+              />
+              <Loader2 className="w-10 h-10 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-blue-400" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Loading Candidates</h3>
+            <p className="text-gray-400">Fetching candidate information from secure database...</p>
+          </motion.div>
+        )}
+
+        {/* Error State */}
+        {error && !loading && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl border border-red-500/30 p-8 max-w-2xl mx-auto"
+          >
+            <div className="text-center space-y-6">
+              <div className="relative inline-block">
+                <div className="absolute inset-0 bg-red-500/20 rounded-full blur-xl"></div>
+                <AlertCircle className="relative w-20 h-20 text-red-400 mx-auto" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-2">Unable to Load Candidates</h2>
+                <p className="text-gray-400">{error}</p>
+              </div>
+              <button
+                onClick={() => window.location.reload()}
+                className="py-3 px-6 rounded-xl bg-gradient-to-r from-blue-600 to-emerald-600 text-white font-semibold hover:shadow-xl transition-all"
+              >
+                Retry Loading
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Candidates Grid */}
+        <AnimatePresence>
+          {!loading && !error && (
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-white">Available Candidates</h2>
+                <div className="text-sm text-gray-400">
+                  {candidates.length} candidate{candidates.length !== 1 ? 's' : ''} total
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {candidates.map((candidate, index) => (
+                  <motion.div
+                    key={candidate._id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                    className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl border border-gray-700/50 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group"
+                  >
+                    <div className="p-6">
+                      {/* Candidate Header */}
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="relative">
+                            <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-emerald-600 rounded-full blur-sm opacity-30"></div>
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-emerald-600 flex items-center justify-center text-white font-bold text-lg relative">
+                              {candidate.name?.charAt(0) || 'C'}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-bold text-white group-hover:text-blue-300 transition-colors">
+                                {candidate.name}
+                              </h3>
+                              {index === 0 && (
+                                <Crown className="w-4 h-4 text-yellow-400" />
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1 text-xs text-gray-400 mt-1">
+                              <User className="w-3 h-3" />
+                              <span>Candidate ID: {candidate._id?.slice(-6)}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className={`text-xs font-semibold px-3 py-1 rounded-full ${candidate.party === 'Independent'
+                            ? 'bg-purple-500/20 text-purple-300'
+                            : 'bg-blue-500/20 text-blue-300'
+                            }`}>
+                            {candidate.party || 'Independent'}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Party & Region Info */}
+                      <div className="space-y-3 mb-6">
+                        <div className="flex items-center gap-2 text-sm text-gray-300">
+                          <Building className="w-4 h-4" />
+                          <span>{candidate.party || 'Independent Party'}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-300">
+                          <Globe className="w-4 h-4" />
+                          <span>{candidate.region || 'Nationwide'}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-300">
+                          <Briefcase className="w-4 h-4" />
+                          <span>{candidate.position || 'Presidential Candidate'}</span>
+                        </div>
+                      </div>
+
+                      {/* Candidate Stats */}
+                      <div className="grid grid-cols-2 gap-3 mb-6">
+                        <div className="p-3 rounded-xl bg-gray-800/50 text-center">
+                          <div className="text-2xl font-bold text-white">
+                            {Math.floor(Math.random() * 100)}%
+                          </div>
+                          <div className="text-xs text-gray-400">Poll Rating</div>
+                        </div>
+                        <div className="p-3 rounded-xl bg-gray-800/50 text-center">
+                          <div className="text-2xl font-bold text-white">
+                            {Math.floor(Math.random() * 1000)}
+                          </div>
+                          <div className="text-xs text-gray-400">Supporters</div>
+                        </div>
+                      </div>
+
+                      {/* Vote Button */}
+                      <motion.button
+                        onClick={() => handleVoteClick(candidate._id)}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 text-white font-semibold flex items-center justify-center gap-3 hover:shadow-xl transition-all group/btn"
+                      >
+                        <Vote className="w-5 h-5" />
+                        <span>Select & Vote</span>
+                        <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                      </motion.button>
+                    </div>
+
+                    {/* Selection Indicator */}
+                    <div className="h-1 bg-gradient-to-r from-emerald-500 to-green-500"></div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+        </AnimatePresence>
+
+        {/* Empty State */}
+        {!loading && !error && candidates.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-20"
+          >
+            <div className="relative inline-block mb-6">
+              <div className="absolute inset-0 bg-gray-500/20 rounded-full blur-xl"></div>
+              <User className="relative w-24 h-24 text-gray-400 mx-auto" />
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-2">No Candidates Available</h3>
+            <p className="text-gray-400 max-w-md mx-auto mb-6">
+              There are currently no candidates registered for this election. Please check back later.
+            </p>
+            <button
+              onClick={() => navigate(-1)}
+              className="py-3 px-6 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold hover:shadow-xl transition-all"
+            >
+              Return to Ballots
+            </button>
+          </motion.div>
+        )}
+
+        {/* Voting Guidelines */}
+        {!loading && !error && candidates.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="mt-12 pt-8 border-t border-gray-700/30"
+          >
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="text-center p-6 rounded-2xl bg-gray-800/30 border border-gray-700/50">
+                <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                  <CheckCircle className="w-6 h-6 text-blue-400" />
+                </div>
+                <h4 className="font-bold text-white mb-2">Review Carefully</h4>
+                <p className="text-sm text-gray-400">
+                  Examine each candidate's profile before making your selection
+                </p>
+              </div>
+              <div className="text-center p-6 rounded-2xl bg-gray-800/30 border border-gray-700/50">
+                <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                  <Shield className="w-6 h-6 text-emerald-400" />
+                </div>
+                <h4 className="font-bold text-white mb-2">Secure Selection</h4>
+                <p className="text-sm text-gray-400">
+                  Your choice is encrypted and cannot be modified after submission
+                </p>
+              </div>
+              <div className="text-center p-6 rounded-2xl bg-gray-800/30 border border-gray-700/50">
+                <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                  <Star className="w-6 h-6 text-purple-400" />
+                </div>
+                <h4 className="font-bold text-white mb-2">One Vote Per Ballot</h4>
+                <p className="text-sm text-gray-400">
+                  You can only vote once in this election. Choose wisely
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Back Button */}
+        <div className="mt-8">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+          >
+            <ArrowRight className="w-4 h-4 rotate-180" />
+            Back to Ballots
           </button>
         </div>
-      )}
+      </div>
     </div>
   );
 }

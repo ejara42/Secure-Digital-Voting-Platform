@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import NavBar from "./component/NavBar";
 import Footer from "./component/Footer";
-import "./i18n"; // i18n setup
+import "./i18n";
 
 // Pages
 import Home from "./page/home";
@@ -20,13 +20,14 @@ import AdminRoute from "./component/AdminRoute";
 import ProtectedRoute from "./component/ProtectedRoute";
 import AdminDashboard from "./admin/AdminDashboard";
 import AdminCandidates from "./admin/AdminCandidates";
+import AdminBallots from "./admin/AdminBallots";
 import AdminVoters from "./admin/AdminVoters";
 import AdminResults from "./admin/AdminResults";
+import AdminAudits from "./admin/AdminAudits";
 
 export default function App() {
   const [userRole, setUserRole] = useState(null);
 
-  // Load user role from localStorage and auto-update on change
   useEffect(() => {
     const loadRole = () => setUserRole(localStorage.getItem("role"));
     loadRole();
@@ -36,20 +37,23 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Pass userRole to NavBar for role-based menu */}
       <NavBar userRole={userRole} />
-
       <main className="flex-1">
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Home />} />
           <Route path="/ballots" element={<Ballots />} />
-          <Route path="/candidates" element={<Candidates />} />
+          <Route path="/ballots/:ballotId/candidates" element={<Candidates />} />
           <Route path="/results" element={<Results />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/vote/:ballotId/:candidateId" element={<Vote />}
+
+
+          />
+
 
           {/* Protected voter routes */}
           <Route
@@ -79,6 +83,14 @@ export default function App() {
             }
           />
           <Route
+            path="/admin/Ballots"
+            element={
+              <AdminRoute>
+                <AdminBallots />
+              </AdminRoute>
+            }
+          />
+          <Route
             path="/admin/voters"
             element={
               <AdminRoute>
@@ -94,12 +106,19 @@ export default function App() {
               </AdminRoute>
             }
           />
+          <Route
+            path="/admin/audits"
+            element={
+              <AdminRoute>
+                <AdminAudits />
+              </AdminRoute>
+            }
+          />
 
           {/* Catch-all redirect */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
-
       <Footer />
     </div>
   );

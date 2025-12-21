@@ -1,93 +1,234 @@
 import axios from "axios";
 
-// Create axios instance
+/* ======================================
+   AXIOS INSTANCE
+====================================== */
 const API = axios.create({
-  baseURL: "http://localhost:8080/api/v1",
-  timeout: 10000,
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
+  withCredentials: true,
 });
 
-// Auto attach JWT token if exists
-API.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+/* ======================================
+   AUTO ATTACH JWT TOKEN
+====================================== */
+API.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
 
-// Global error handler
-API.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    console.error("API Error:", error.response?.data || error.message);
-    throw error;
-  }
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    if (!config.headers["Content-Type"]) {
+      config.headers["Content-Type"] = "application/json";
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error)
 );
 
-// =====================
-// AUTH
-// =====================
-export async function login(nationalId, password) {
-  const res = await API.post("/auth/login", { nationalId, password });
-  return res.data;
-}
+/* ======================================
+   CENTRALIZED ERROR HANDLER
+====================================== */
+const handleError = (err) => {
+  console.error("API Error:", err.response?.data || err.message);
+  throw err.response?.data || err;
+};
 
-// =====================
-// VOTER / BALLOTS
-// =====================
-export async function getBallot(region) {
-  const res = await API.get(`/ballots/${region}`);
-  return res.data;
-}
+/* ======================================
+   AUTH
+====================================== */
+export const login = (identifier, password) =>
+  API.post("/auth/login", { identifier, password }).catch(handleError);
 
-export async function submitVote(payload) {
-  const token = localStorage.getItem("token");
-  const res = await API.post("/votes", payload, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return res.data;
-}
+export const registerVoter = (formData) =>
+  API.post("/auth/register", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  }).catch(handleError);
 
-// =====================
-// CANDIDATES
-// =====================
-export async function getCandidates(ballotId) {
-  // optional: get candidates by ballot
-  const url = ballotId ? `/ballots/${ballotId}/candidates` : "/candidates";
-  const res = await API.get(url);
-  return res.data;
-}
+export const verifyVoterSession = async () => {
+  try {
+    const res = await API.get("/auth/verify");
+    return res.data.valid === true;
+  } catch {
+    return false;
+  }
+};
 
-export async function addCandidate(data) {
-  const res = await API.post("/candidates", data);
-  return res.data;
-}
+/* ======================================
+   BALLOTS
+====================================== */
+export const getBallots = async () => {
+  try {
+    const res = await API.get("/ballots");
+    return res.data;
+  } catch (err) {
+    handleError(err);
+    return [];
+  }
+};
 
-export async function updateCandidate(id, data) {
-  const res = await API.put(`/candidates/${id}`, data);
-  return res.data;
-}
+export const getBallotMeta = async (ballotId) => {
+  if (!ballotId) return null;
+  try {
+    const res = await API.get(`/ballots/${ballotId}/meta`);
+    return res.data;
+  } catch (err) {
+    handleError(err);
+    return null;
+  }
+};
 
-export async function deleteCandidate(id) {
-  const res = await API.delete(`/candidates/${id}`);
-  return res.data;
-}
+export const createBallot = (data) =>
+  API.post("/ballots", data).catch(handleError);
 
-// =====================
-// VOTERS (Admin)
-// =====================
-export async function getVoters() {
-  const res = await API.get("/voters");
-  return res.data;
-}
+export const updateBallot = (id, data) => {
+  if (!id) return null;
+  return API.put(`/ballots/${id}`, data).catch(handleError);
+};
 
-// =====================
-// RESULTS
-// =====================
-export async function getResults() {
-  const res = await API.get("/results");
-  return res.data;
-}
+/* ======================================
+   CANDIDATES
+====================================== */
+export const getCandidates = async () => {
+  try {
+    const res = await API.get("/candidates");
+    return res.data;
+  } catch (err) {
+    handleError(err);
+    return [];
+  }
+};
 
-// =====================
-// EXPORT DEFAULT
-// =====================
+export const getCandidatesByBallot = async (ballotId) => {
+  if (!ballotId) return [];
+  try {
+    const res = await API.get(`/candidates/ballot/${ballotId}`);
+    return res.data;
+  } catch (err) {
+    handleError(err);
+    return [];
+  }
+};
+
+export const createCandidate = (formData) =>
+  API.post("/candidates", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  }).catch(handleError);
+
+export const updateCandidate = (id, formData) => {
+  if (!id) return null;
+  return API.put(`/candidates/${id}`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  }).catch(handleError);
+};
+
+export const deleteCandidate = (id) => {
+  if (!id) return null;
+  return API.delete(`/candidates/${id}`).catch(handleError);
+};
+
+/* ======================================
+   VOTES  ✅ BACKEND-COMPATIBLE
+====================================== */
+
+export const castVote = async ({ ballotId, candidateId }) => {
+  if (!ballotId || !candidateId) {
+    throw new Error("Invalid vote payload");
+  }
+
+  try {
+    const res = await API.post("/votes", {
+      ballotId,
+      candidateId,
+    });
+    return res.data; // { receipt }
+  } catch (err) {
+    handleError(err);
+    return null;
+  }
+};
+
+export const checkVoteStatus = async (ballotId) => {
+  if (!ballotId) return { voted: false };
+
+  try {
+    const res = await API.get(`/votes/status/${ballotId}`);
+    return res.data; // { voted: true | false }
+  } catch (err) {
+    handleError(err);
+    return { voted: false };
+  }
+};
+
+
+/* ======================================
+   RESULTS
+====================================== */
+export const getResults = async (electionId) => {
+  if (!electionId)
+    return { results: [], totalVotes: 0, totalVoters: 0, turnoutPercent: 0 };
+  try {
+    const res = await API.get(`/results/${electionId}`);
+    const data = res.data;
+    // Ensure consistent format for all components
+    return {
+      results: Array.isArray(data) ? data : data.results || [],
+      totalVotes: data.totalVotes || 0,
+      totalVoters: data.totalVoters || 0,
+      turnoutPercent: data.turnoutPercent || 0,
+    };
+  } catch (err) {
+    console.error("getResults error:", err.response?.data || err.message);
+    return { results: [], totalVotes: 0, totalVoters: 0, turnoutPercent: 0 };
+  }
+};
+
+/* ======================================
+   VOTERS (ADMIN)
+====================================== */
+export const getVoters = async () => {
+  try {
+    const res = await API.get("/voters");
+    return res.data;
+  } catch (err) {
+    handleError(err);
+    return [];
+  }
+};
+
+export const getVoter = async (id) => {
+  if (!id) return null;
+  try {
+    const res = await API.get(`/voters/${id}`);
+    return res.data;
+  } catch (err) {
+    handleError(err);
+    return null;
+  }
+};
+
+export const deleteVoter = (id) => {
+  if (!id) return null;
+  return API.delete(`/voters/${id}`).catch(handleError);
+};
+
+/* ======================================
+   AUDIT LOGS
+====================================== */
+export const recordAuditEvent = (data) =>
+  API.post("/audit/log", data).catch(handleError);
+
+export const listArchivedAudits = (params) =>
+  API.get("/admin/audit/list", { params }).catch(handleError);
+
+export const getAuditPresignedUrl = (key) => {
+  if (!key) return null;
+  return API.get("/admin/audit/presign", { params: { key } }).catch(handleError);
+};
+
+/* ======================================
+   DEFAULT EXPORT
+====================================== */
 export default API;

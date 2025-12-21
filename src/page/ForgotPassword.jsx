@@ -1,66 +1,69 @@
+// src/pages/ForgotPassword.jsx
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function ForgotPassword() {
-    const [nationalId, setNationalId] = useState("");
-    const [email, setEmail] = useState("");
-    const [message, setMessage] = useState("");
+    const [identifier, setIdentifier] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [sent, setSent] = useState(false);
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!identifier.trim()) {
+            alert("Enter your email or national ID");
+            return;
+        }
+
+        setLoading(true);
         try {
-            await axios.post("http://localhost:5000/api/voters/forgot-password", {
-                nationalId,
-                email,
-            });
-            setMessage(
-                "If your account exists, a password reset link has been sent to your email."
-            );
+            await axios.post("http://localhost:5000/api/auth/forgot-password", { identifier: identifier.trim() });
+            setSent(true);
         } catch (err) {
-            setMessage(
-                "If your account exists, a password reset link has been sent to your email."
-            ); // Do not reveal error for security
+            console.error(err);
+            alert(err.response?.data?.message || "Failed to send reset instructions");
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-            <form
-                onSubmit={handleSubmit}
-                className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md"
-            >
-                <h2 className="text-2xl font-bold mb-6 text-center">Forgot Password</h2>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 p-4">
+            <div className="max-w-md w-full bg-white p-6 rounded-2xl shadow-lg">
+                <h2 className="text-2xl font-bold mb-4">Forgot Password</h2>
 
-                {message && <p className="bg-green-100 text-green-700 p-2 mb-4 rounded">{message}</p>}
+                {sent ? (
+                    <div className="p-4 bg-green-50 rounded text-green-800">
+                        If the account exists, password reset instructions have been sent to the registered email.
+                        Check your inbox and follow the link. (If you don't receive an email, check spam.)
+                        <div className="mt-3">
+                            <button onClick={() => navigate("/login")} className="text-sm text-blue-600 hover:underline">Back to login</button>
+                        </div>
+                    </div>
+                ) : (
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <p className="text-sm text-gray-600">Enter your registered email address or national ID to receive password reset instructions.</p>
 
-                <div className="mb-4">
-                    <label className="block text-gray-700">National ID</label>
-                    <input
-                        value={nationalId}
-                        onChange={(e) => setNationalId(e.target.value)}
-                        className="w-full px-4 py-2 mt-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        required
-                    />
-                </div>
+                        <input
+                            value={identifier}
+                            onChange={(e) => setIdentifier(e.target.value)}
+                            className="w-full p-3 border rounded-lg"
+                            placeholder="Email or National ID"
+                        />
 
-                <div className="mb-4">
-                    <label className="block text-gray-700">Registered Email</label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full px-4 py-2 mt-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        required
-                    />
-                </div>
+                        <div className="flex gap-3">
+                            <button type="submit" disabled={loading} className="flex-1 py-2 bg-blue-600 text-white rounded-lg">
+                                {loading ? "Sending..." : "Send Reset Instructions"}
+                            </button>
 
-                <button
-                    type="submit"
-                    className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300"
-                >
-                    Send Reset Link
-                </button>
-            </form>
+                            <button type="button" onClick={() => navigate("/login")} className="py-2 px-4 border rounded-lg">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                )}
+            </div>
         </div>
     );
 }

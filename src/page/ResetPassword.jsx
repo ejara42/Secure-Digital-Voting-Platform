@@ -1,77 +1,89 @@
-import React, { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+// src/pages/ResetPassword.jsx
+import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useLocation, useNavigate } from "react-router-dom";
+
+function useQuery() {
+    return new URLSearchParams(useLocation().search);
+}
 
 export default function ResetPassword() {
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [message, setMessage] = useState("");
-    const location = useLocation();
+    const query = useQuery();
     const navigate = useNavigate();
 
-    // Get token from query string
-    const params = new URLSearchParams(location.search);
-    const token = params.get("token");
+    const token = query.get("token") || "";
+    const userId = query.get("id") || "";
+
+    const [password, setPassword] = useState("");
+    const [password2, setPassword2] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        // Basic quick check
+        if (!token || !userId) {
+            // Not enough info — redirect
+            // Optionally show message
+        }
+    }, [token, userId]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (password !== confirmPassword) {
-            setMessage("Passwords do not match");
-            return;
-        }
+        if (!password || !password2) return alert("Enter password twice");
+        if (password !== password2) return alert("Passwords do not match");
+        if (password.length < 6) return alert("Password must be at least 6 characters");
+
+        setLoading(true);
         try {
-            await axios.post("http://localhost:5000/api/voters/reset-password", {
+            await axios.post("http://localhost:5000/api/auth/reset-password", {
+                userId,
                 token,
                 newPassword: password,
             });
-            setMessage("Password updated successfully! Redirecting to login...");
-            setTimeout(() => navigate("/"), 3000);
+
+            alert("Password reset successful — you can now login with your new password.");
+            navigate("/login");
         } catch (err) {
-            setMessage(err.response?.data?.message || "Something went wrong");
+            console.error(err);
+            alert(err.response?.data?.message || "Failed to reset password. The token may be invalid or expired.");
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-            <form
-                onSubmit={handleSubmit}
-                className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md"
-            >
-                <h2 className="text-2xl font-bold mb-6 text-center">Reset Password</h2>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-indigo-50 p-4">
+            <div className="max-w-md w-full bg-white p-6 rounded-2xl shadow-lg">
+                <h2 className="text-2xl font-bold mb-4">Reset Password</h2>
 
-                {message && (
-                    <p className="bg-green-100 text-green-700 p-2 mb-4 rounded">{message}</p>
-                )}
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <p className="text-sm text-gray-600">Enter your new password. This link will expire soon.</p>
 
-                <div className="mb-4">
-                    <label className="block text-gray-700">New Password</label>
                     <input
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full px-4 py-2 mt-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        required
+                        className="w-full p-3 border rounded-lg"
+                        placeholder="New password"
                     />
-                </div>
-
-                <div className="mb-4">
-                    <label className="block text-gray-700">Confirm Password</label>
                     <input
                         type="password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="w-full px-4 py-2 mt-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        required
+                        value={password2}
+                        onChange={(e) => setPassword2(e.target.value)}
+                        className="w-full p-3 border rounded-lg"
+                        placeholder="Confirm new password"
                     />
-                </div>
 
-                <button
-                    type="submit"
-                    className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300"
-                >
-                    Reset Password
-                </button>
-            </form>
+                    <div className="flex gap-3">
+                        <button type="submit" disabled={loading} className="flex-1 py-2 bg-green-600 text-white rounded-lg">
+                            {loading ? "Resetting..." : "Reset Password"}
+                        </button>
+
+                        <button type="button" onClick={() => navigate("/login")} className="py-2 px-4 border rounded-lg">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 }
