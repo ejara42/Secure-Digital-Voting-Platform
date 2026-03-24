@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.427.0",
+    "@aws-sdk/lib-storage": "^3.990.0",
     "@aws-sdk/s3-request-presigner": "^3.427.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
@@ -46,6 +47,9 @@
     "setupFilesAfterEnv": [
       "<rootDir>/tests/setup/integrationSetup.js"
     ],
-    "testTimeout": 30000
+    "testTimeout": 30000,
+    "transformIgnorePatterns": [
+      "node_modules/(?!@aws-sdk|uuid)"
+    ]
   }
 }

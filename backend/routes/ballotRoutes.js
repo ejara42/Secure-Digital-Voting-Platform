@@ -6,13 +6,15 @@ const {
     listBallots,
     ballotDropdown,
     createBallot,
-    ballotCandidates
+    ballotCandidates,
+    getBallot
 } = require("../controllers/ballotController");
 
 // PUBLIC
 router.get("/", listBallots);
 router.get("/dropdown", ballotDropdown);
 router.get("/:id/candidates", ballotCandidates);
+router.get("/:id/meta", getBallot);
 
 // ADMIN
 router.post("/", auth, adminOnly, createBallot);

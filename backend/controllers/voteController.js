@@ -1,6 +1,7 @@
-const Vote = require("../models/Vote");
-const Candidate = require("../models/candidate");
+const Vote = require("../models/vote");
+const Candidate = require("../models/Candidate");
 const crypto = require("crypto");
+
 
 exports.castVote = async (req, res) => {
     try {
@@ -35,6 +36,13 @@ exports.castVote = async (req, res) => {
         await Candidate.findByIdAndUpdate(candidateId, {
             $inc: { votes: 1 }
         });
+
+        // ✅ REAL-TIME UPDATE
+        const io = req.app.get("io");
+        if (io) {
+            io.emit("resultsUpdated", { ballotId });
+            io.emit("voteCast", { candidateId, ballotId });
+        }
 
         res.status(201).json({ receipt });
 

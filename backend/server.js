@@ -4,6 +4,8 @@ const http = require("http");
 const cors = require("cors");
 const path = require("path");
 const mongoose = require("mongoose");
+require("./events/voteListeners");
+
 
 // Routes
 const authRoutes = require("./routes/authRoutes");
@@ -18,9 +20,10 @@ const rateLimiter = require("./middleware/rateLimiter");
 
 const app = express();
 
-// --------------------
-// ✅ CORS (FIRST)
-// --------------------
+/* =====================================================
+   ✅ CORS — LOCAL DEVELOPMENT ONLY
+===================================================== */
+
 app.use(
     cors({
         origin: "http://localhost:5173",
@@ -30,23 +33,23 @@ app.use(
     })
 );
 
-// ✅ Preflight support
+// Preflight
 app.options("*", cors());
 
-// --------------------
-// Middleware
-// --------------------
+/* =====================================================
+   Middleware
+===================================================== */
 app.use(express.json({ limit: "10mb" }));
 app.use(rateLimiter);
 
-// --------------------
-// Static files
-// --------------------
+/* =====================================================
+   Static files
+===================================================== */
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// --------------------
-// Routes
-// --------------------
+/* =====================================================
+   API Routes
+===================================================== */
 app.use("/api/auth", authRoutes);
 app.use("/api/ballots", ballotRoutes);
 app.use("/api/votes", voteRoutes);
@@ -54,16 +57,16 @@ app.use("/api/candidates", candidateRoutes);
 app.use("/api/results", resultRoutes);
 app.use("/api/voters", voterRoutes);
 
-// --------------------
-// ❗ 404 handler (PREVENTS CRASH)
-// --------------------
+/* =====================================================
+   404 Handler
+===================================================== */
 app.use((req, res) => {
     res.status(404).json({ message: "Route not found" });
 });
 
-// --------------------
-// ❗ Central error handler
-// --------------------
+/* =====================================================
+   Global Error Handler
+===================================================== */
 app.use((err, req, res, next) => {
     console.error("Unhandled error:", err);
     res.status(err.status || 500).json({
@@ -71,35 +74,36 @@ app.use((err, req, res, next) => {
     });
 });
 
-// --------------------
-// Server
-// --------------------
-const server = http.createServer(app);
+/* =====================================================
+   Server
+===================================================== */
 const PORT = process.env.PORT || 5000;
+const server = http.createServer(app);
 
-// --------------------
-// MongoDB (STRICT SAFE MODE)
-// --------------------
+/* =====================================================
+   MongoDB — LOCAL
+===================================================== */
 mongoose.set("strictQuery", true);
 
+const MONGO_URI =
+    process.env.MONGO_URI || "mongodb://127.0.0.1:27017/voterdb";
+
 mongoose
-    .connect(process.env.MONGO_URI || "mongodb://127.0.0.1:27017/voterdb", {
-        serverSelectionTimeoutMS: 30000,
-    })
+    .connect(MONGO_URI)
     .then(() => {
-        console.log("MongoDB connected");
-        server.listen(PORT, () =>
-            console.log(`Server running on port ${PORT}`)
-        );
+        console.log("MongoDB connected (LOCAL)");
+        server.listen(PORT, () => {
+            console.log(`Backend running at http://localhost:${PORT}`);
+        });
     })
     .catch((err) => {
         console.error("MongoDB connection failed:", err.message);
         process.exit(1);
     });
 
-// --------------------
-// ❗ Process-level crash protection
-// --------------------
+/* =====================================================
+   Process-level protection
+===================================================== */
 process.on("unhandledRejection", (reason) => {
     console.error("Unhandled Rejection:", reason);
 });

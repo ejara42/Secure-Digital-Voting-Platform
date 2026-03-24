@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import AdminLayout from "./AdminLayout";
 import API from "../api/api";
 import toast from "react-hot-toast";
-import Modal from "../component/Modal";
+import Modal from "../components/Modal";
 import { useForm } from "react-hook-form";
 
 export default function AdminBallots() {
@@ -13,7 +13,7 @@ export default function AdminBallots() {
 
     const { register, handleSubmit, reset } = useForm();
 
-    // Fetch ballots
+    // ================= FETCH BALLOTS =================
     const fetchBallots = async () => {
         try {
             setLoading(true);
@@ -30,36 +30,43 @@ export default function AdminBallots() {
         fetchBallots();
     }, []);
 
+    // ================= OPEN ADD =================
     const openAdd = () => {
         setEditing(null);
         reset({
             title: "",
             electionName: "",
             year: "",
-            description: ""
+            description: "",
+            startDate: "",
+            endDate: ""
         });
         setModalOpen(true);
     };
 
+    // ================= OPEN EDIT =================
     const openEdit = (ballot) => {
         setEditing(ballot);
         reset({
             title: ballot.title,
             electionName: ballot.electionName,
             year: ballot.year,
-            description: ballot.description || ""
+            description: ballot.description || "",
+            startDate: ballot.startDate?.slice(0, 10),
+            endDate: ballot.endDate?.slice(0, 10)
         });
         setModalOpen(true);
     };
 
+    // ================= SUBMIT =================
     const onSubmit = async (data) => {
         try {
             if (editing) {
                 await API.put(`/ballots/${editing._id}`, data);
-                toast.success("Ballot updated");
+                toast.success("Ballot updated successfully");
             } else {
                 await API.post("/ballots", data);
-                toast.success("Ballot created");
+                toast.success("Ballot created successfully");
             }
             setModalOpen(false);
             fetchBallots();
@@ -80,6 +87,7 @@ export default function AdminBallots() {
                 </button>
             </div>
 
+            {/* ================= TABLE ================= */}
             <table className="w-full bg-white shadow rounded">
                 <thead className="bg-gray-100">
                     <tr>
@@ -92,11 +100,15 @@ export default function AdminBallots() {
                 <tbody>
                     {loading ? (
                         <tr>
-                            <td colSpan="4" className="p-4 text-center">Loading...</td>
+                            <td colSpan="4" className="p-4 text-center">
+                                Loading...
+                            </td>
                         </tr>
                     ) : ballots.length === 0 ? (
                         <tr>
-                            <td colSpan="4" className="p-4 text-center">No ballots found</td>
+                            <td colSpan="4" className="p-4 text-center">
+                                No ballots found
+                            </td>
                         </tr>
                     ) : (
                         ballots.map((b) => (
@@ -118,7 +130,7 @@ export default function AdminBallots() {
                 </tbody>
             </table>
 
-            {/* Modal */}
+            {/* ================= MODAL ================= */}
             <Modal
                 isOpen={modalOpen}
                 onClose={() => setModalOpen(false)}
@@ -134,7 +146,7 @@ export default function AdminBallots() {
 
                     <input
                         {...register("electionName", { required: true })}
-                        placeholder="Election Name (e.g. National Election)"
+                        placeholder="Election Name"
                         className="w-full border p-2 rounded"
                     />
 
@@ -151,6 +163,19 @@ export default function AdminBallots() {
                     <textarea
                         {...register("description")}
                         placeholder="Description"
+                        className="w-full border p-2 rounded"
+                    />
+
+                    {/* ✅ REQUIRED DATES */}
+                    <input
+                        type="date"
+                        {...register("startDate", { required: true })}
+                        className="w-full border p-2 rounded"
+                    />
+
+                    <input
+                        type="date"
+                        {...register("endDate", { required: true })}
                         className="w-full border p-2 rounded"
                     />
 

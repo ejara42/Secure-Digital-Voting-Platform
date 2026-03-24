@@ -32,18 +32,37 @@ const ballotDropdown = async (req, res) => {
  */
 const createBallot = async (req, res) => {
     try {
-        const { title, electionName, year, description } = req.body;
-        if (!title || !electionName || !year) {
-            return res.status(400).json({ message: "Title, election name, and year are required" });
+        const {
+            title,
+            electionName,
+            year,
+            description,
+            startDate,
+            endDate
+        } = req.body;
+
+        if (!title || !electionName || !year || !startDate || !endDate) {
+            return res.status(400).json({
+                message: "Title, election name, year, start date and end date are required"
+            });
         }
 
-        const ballot = await Ballot.create({ title, electionName, year, description });
+        const ballot = await Ballot.create({
+            title,
+            electionName,
+            year,
+            description,
+            startDate,
+            endDate
+        });
+
         res.status(201).json(ballot);
     } catch (err) {
         console.error("createBallot error:", err);
         res.status(500).json({ message: "Server error" });
     }
 };
+
 
 /**
  * GET CANDIDATES FOR A BALLOT
@@ -67,9 +86,21 @@ const ballotCandidates = async (req, res) => {
     }
 };
 
+const getBallot = async (req, res) => {
+    try {
+        const ballot = await Ballot.findById(req.params.id);
+        if (!ballot) return res.status(404).json({ message: "Ballot not found" });
+        res.json(ballot);
+    } catch (err) {
+        console.error("getBallot error:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
 module.exports = {
     listBallots,
     ballotDropdown,
     createBallot,
     ballotCandidates,
+    getBallot,
 };

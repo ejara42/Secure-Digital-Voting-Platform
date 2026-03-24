@@ -1,19 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const Candidate = require("../models/Candidate");
-const auth = require("../middleware/authMiddleware");
-const adminOnly = require("../middleware/adminMiddleware");
+const { getResults, getAllResults } = require("../controllers/resultController");
 
-router.get("/", auth, adminOnly, async (req, res) => {
-    try {
-        const results = await Candidate.find()
-            .populate("ballot", "title year")
-            .sort({ votes: -1 });
-
-        res.json(results);
-    } catch (err) {
-        res.status(500).json({ message: "Server error" });
-    }
-});
+router.get("/", getAllResults);
+router.get("/:ballotId", getResults);
 
 module.exports = router;

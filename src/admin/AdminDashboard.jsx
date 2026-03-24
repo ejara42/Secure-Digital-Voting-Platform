@@ -12,7 +12,11 @@ import {
   Download, Eye, Filter
 } from "lucide-react";
 
+import { io } from "socket.io-client";
+
 ChartJS.register(ArcElement, Tooltip, Legend);
+
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({ voters: 0, votes: 0, candidates: 0 });
@@ -65,6 +69,32 @@ export default function AdminDashboard() {
       }
     };
     fetchResults();
+  }, []);
+
+  // 🔌 Real-time Socket Connection
+  useEffect(() => {
+    const socket = io(SOCKET_URL, { transports: ["websocket"] });
+
+    socket.on("connect", () => {
+      console.log("🟢 Connected to live election socket");
+    });
+
+    socket.on("voteCast", (data) => {
+      // 1. Update Total Votes
+      setStats(prev => ({ ...prev, votes: prev.votes + 1 }));
+
+      // 2. Update Today's Votes
+      setSystemMetrics(prev => ({ ...prev, todayVotes: prev.todayVotes + 1 }));
+
+      // 3. Update Individual Candidate Results
+      setResults(prev => prev.map(c =>
+        c._id === data.candidateId || c.id === data.candidateId
+          ? { ...c, votes: c.votes + 1 }
+          : c
+      ));
+    });
+
+    return () => socket.disconnect();
   }, []);
 
   const cardData = [
@@ -162,27 +192,27 @@ export default function AdminDashboard() {
 
   return (
     <AdminLayout>
-      <div className="p-6 lg:p-8">
+      <div className="p-6 lg:p-8 space-y-8">
         {/* Header with Actions */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-900 bg-clip-text text-transparent">
+            <h1 className="text-3xl lg:text-4xl font-heading font-bold text-slate-900 bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
               Election Admin Dashboard
             </h1>
-            <p className="text-gray-600 mt-2">Real-time monitoring and analytics for the election system</p>
+            <p className="text-slate-500 mt-2 font-medium">Real-time monitoring and analytics for the election system</p>
           </div>
 
           <div className="flex items-center gap-3">
             <button
               onClick={refreshDashboard}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-lg transition-all"
+              className="btn-primary flex items-center gap-2"
             >
               <RefreshCw className="w-4 h-4" />
               Refresh
             </button>
             <button
               onClick={exportDashboard}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-300 hover:bg-gray-50 transition-all"
+              className="btn-secondary flex items-center gap-2"
             >
               <Download className="w-4 h-4" />
               Export
@@ -191,66 +221,66 @@ export default function AdminDashboard() {
         </div>
 
         {/* System Metrics */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-gradient-to-br from-gray-50 to-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="card hover:shadow-md transition-all duration-200">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm text-gray-500 mb-1">System Uptime</div>
-                <div className="text-2xl font-bold text-gray-800">{systemMetrics.uptime}</div>
+                <div className="text-sm text-slate-500 font-medium mb-1">System Uptime</div>
+                <div className="text-2xl font-bold text-slate-800 font-heading">{systemMetrics.uptime}</div>
               </div>
-              <div className="p-3 rounded-xl bg-emerald-500/10">
-                <Activity className="w-6 h-6 text-emerald-500" />
+              <div className="p-3 rounded-xl bg-success-50 text-success-700">
+                <Activity className="w-6 h-6" />
               </div>
             </div>
-            <div className="flex items-center gap-1 text-sm text-emerald-600 mt-3">
+            <div className="flex items-center gap-1 text-sm text-success-700 mt-3 font-medium">
               <CheckCircle className="w-4 h-4" />
               <span>Stable</span>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-gray-50 to-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+          <div className="card hover:shadow-md transition-all duration-200">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm text-gray-500 mb-1">Active Sessions</div>
-                <div className="text-2xl font-bold text-gray-800">{systemMetrics.activeSessions}</div>
+                <div className="text-sm text-slate-500 font-medium mb-1">Active Sessions</div>
+                <div className="text-2xl font-bold text-slate-800 font-heading">{systemMetrics.activeSessions}</div>
               </div>
-              <div className="p-3 rounded-xl bg-blue-500/10">
-                <Users className="w-6 h-6 text-blue-500" />
+              <div className="p-3 rounded-xl bg-primary-50 text-primary-600">
+                <Users className="w-6 h-6" />
               </div>
             </div>
-            <div className="flex items-center gap-1 text-sm text-blue-600 mt-3">
+            <div className="flex items-center gap-1 text-sm text-primary-600 mt-3 font-medium">
               <TrendingUp className="w-4 h-4" />
               <span>+3 from yesterday</span>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-gray-50 to-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+          <div className="card hover:shadow-md transition-all duration-200">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm text-gray-500 mb-1">Today's Votes</div>
-                <div className="text-2xl font-bold text-gray-800">{systemMetrics.todayVotes.toLocaleString()}</div>
+                <div className="text-sm text-slate-500 font-medium mb-1">Today's Votes</div>
+                <div className="text-2xl font-bold text-slate-800 font-heading">{systemMetrics.todayVotes.toLocaleString()}</div>
               </div>
-              <div className="p-3 rounded-xl bg-purple-500/10">
-                <Vote className="w-6 h-6 text-purple-500" />
+              <div className="p-3 rounded-xl bg-purple-50 text-purple-600">
+                <Vote className="w-6 h-6" />
               </div>
             </div>
-            <div className="flex items-center gap-1 text-sm text-purple-600 mt-3">
+            <div className="flex items-center gap-1 text-sm text-purple-600 mt-3 font-medium">
               <ArrowUpRight className="w-4 h-4" />
               <span>Peak voting hours</span>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-gray-50 to-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+          <div className="card hover:shadow-md transition-all duration-200">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm text-gray-500 mb-1">Security Events</div>
-                <div className="text-2xl font-bold text-gray-800">{systemMetrics.securityEvents}</div>
+                <div className="text-sm text-slate-500 font-medium mb-1">Security Events</div>
+                <div className="text-2xl font-bold text-slate-800 font-heading">{systemMetrics.securityEvents}</div>
               </div>
-              <div className="p-3 rounded-xl bg-green-500/10">
-                <Shield className="w-6 h-6 text-green-500" />
+              <div className="p-3 rounded-xl bg-success-50 text-success-600">
+                <Shield className="w-6 h-6" />
               </div>
             </div>
-            <div className="flex items-center gap-1 text-sm text-green-600 mt-3">
+            <div className="flex items-center gap-1 text-sm text-success-600 mt-3 font-medium">
               <CheckCircle className="w-4 h-4" />
               <span>All clear</span>
             </div>
@@ -262,7 +292,7 @@ export default function AdminDashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8"
+          className="grid grid-cols-1 lg:grid-cols-3 gap-6"
         >
           {cardData.map((card, index) => (
             <motion.div
@@ -271,43 +301,43 @@ export default function AdminDashboard() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
               whileHover={{ y: -5, transition: { duration: 0.2 } }}
-              className="relative overflow-hidden rounded-3xl shadow-xl group"
+              className="relative overflow-hidden rounded-2xl shadow-soft group hover:shadow-xl transition-all"
             >
-              <div className={`absolute inset-0 bg-gradient-to-br ${card.color} opacity-90`}></div>
+              <div className={`absolute inset-0 bg-gradient-to-br ${card.color} opacity-90 transition-opacity group-hover:opacity-100`}></div>
               <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-white/10 blur-xl"></div>
 
-              <div className="relative p-6 text-white">
+              <div className="relative p-6 text-white text-shadow-sm">
                 <div className="flex items-center justify-between mb-4">
-                  <card.icon className="w-8 h-8 opacity-90" />
-                  <div className="flex items-center gap-1 text-sm bg-white/20 px-3 py-1 rounded-full">
+                  <card.icon className="w-8 h-8 opacity-90 drop-shadow-md" />
+                  <div className="flex items-center gap-1 text-xs font-bold bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm border border-white/10">
                     {card.trend === "up" ? (
-                      <ArrowUpRight className="w-4 h-4" />
+                      <ArrowUpRight className="w-3 h-3" />
                     ) : (
-                      <ArrowDownRight className="w-4 h-4" />
+                      <ArrowDownRight className="w-3 h-3" />
                     )}
                     <span>{card.change}</span>
                   </div>
                 </div>
 
                 <div className="mb-2">
-                  <div className="text-4xl lg:text-5xl font-bold mb-1">
+                  <div className="text-4xl lg:text-5xl font-bold mb-1 tracking-tight font-heading">
                     {loadingStats ? (
                       <div className="flex items-center gap-2">
                         <Loader2 className="w-6 h-6 animate-spin" />
-                        <span>Loading...</span>
+                        <span className="text-2xl">Loading...</span>
                       </div>
                     ) : (
                       card.value.toLocaleString()
                     )}
                   </div>
                   <div className="text-lg font-medium opacity-90">{card.title}</div>
-                  <div className="text-sm opacity-75 mt-1">{card.description}</div>
+                  <div className="text-sm opacity-75 mt-1 font-medium">{card.description}</div>
                 </div>
 
                 <div className="mt-6 pt-4 border-t border-white/20">
-                  <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center justify-between text-xs font-medium opacity-90">
                     <span>Last updated: Just now</span>
-                    <Eye className="w-4 h-4 opacity-75" />
+                    <Eye className="w-3 h-3" />
                   </div>
                 </div>
               </div>
@@ -316,22 +346,22 @@ export default function AdminDashboard() {
         </motion.div>
 
         {/* Results Section */}
-        <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-xl border border-gray-200/50 overflow-hidden mb-6">
-          <div className="p-6 lg:p-8">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-4">
+        <div className="card overflow-hidden">
+          <div className="p-0">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 gap-4">
               <div>
-                <h2 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-900 bg-clip-text text-transparent">
+                <h2 className="text-2xl font-bold font-heading text-slate-800">
                   Election Results Overview
                 </h2>
-                <p className="text-gray-600 mt-2">Real-time voting distribution and analytics</p>
+                <p className="text-slate-500 mt-1">Real-time voting distribution and analytics</p>
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-300">
-                  <Filter className="w-4 h-4 text-gray-500" />
-                  <span className="text-sm">Filter Results</span>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 text-sm font-medium hover:bg-white hover:shadow-sm transition-all cursor-pointer">
+                  <Filter className="w-4 h-4" />
+                  <span>Filter Results</span>
                 </div>
-                <div className="text-sm text-gray-500">
+                <div className="text-sm font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
                   {results.length} candidate{results.length !== 1 ? 's' : ''}
                 </div>
               </div>
@@ -349,12 +379,12 @@ export default function AdminDashboard() {
                     <motion.div
                       animate={{ rotate: 360 }}
                       transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                      className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full"
+                      className="w-16 h-16 border-4 border-primary-100 border-t-primary-500 rounded-full"
                     />
-                    <BarChart3 className="w-8 h-8 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-blue-500" />
+                    <BarChart3 className="w-8 h-8 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary-500" />
                   </div>
-                  <h3 className="text-lg font-bold text-gray-800 mb-2">Loading Results</h3>
-                  <p className="text-gray-500">Fetching election data from secure database...</p>
+                  <h3 className="text-lg font-bold text-slate-800 mb-2">Loading Results</h3>
+                  <p className="text-slate-500">Fetching election data from secure database...</p>
                 </motion.div>
               ) : results.length === 0 ? (
                 <motion.div
@@ -364,36 +394,29 @@ export default function AdminDashboard() {
                   className="flex flex-col items-center justify-center py-16"
                 >
                   <div className="relative mb-4">
-                    <div className="absolute inset-0 bg-gray-500/10 rounded-full blur-xl"></div>
-                    <AlertCircle className="relative w-16 h-16 text-gray-400" />
+                    <div className="absolute inset-0 bg-slate-200/50 rounded-full blur-xl"></div>
+                    <AlertCircle className="relative w-16 h-16 text-slate-300" />
                   </div>
-                  <h3 className="text-lg font-bold text-gray-800 mb-2">No Results Available</h3>
-                  <p className="text-gray-500 max-w-md text-center">
+                  <h3 className="text-lg font-bold text-slate-700 mb-2">No Results Available</h3>
+                  <p className="text-slate-500 max-w-md text-center">
                     There are no election results available yet. Results will appear here once voting begins.
                   </p>
                 </motion.div>
               ) : (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12"
-                >
+                <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
                   {/* Chart */}
-                  <div className="w-full lg:w-1/2">
-                    <div className="bg-white p-6 rounded-2xl shadow-inner border border-gray-200">
-                      <div className="h-80">
+                  <div className="w-full lg:w-5/12">
+                    <div className="bg-slate-50/50 p-6 rounded-2xl border border-slate-100 h-full flex items-center justify-center">
+                      <div className="w-full max-w-xs mx-auto">
                         <Pie data={pieData} options={chartOptions} />
-                      </div>
-                      <div className="text-center text-sm text-gray-500 mt-4">
-                        Interactive chart - Hover for details
                       </div>
                     </div>
                   </div>
 
                   {/* Results List */}
-                  <div className="w-full lg:w-1/2">
+                  <div className="w-full lg:w-7/12">
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
+                      <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2 px-2">
                         <span>Candidate</span>
                         <span>Votes • Percentage</span>
                       </div>
@@ -408,66 +431,69 @@ export default function AdminDashboard() {
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.05 }}
-                            className={`group p-4 rounded-2xl border border-gray-200 hover:border-blue-300 transition-all ${isLeading ? 'bg-gradient-to-r from-blue-50 to-cyan-50' : 'bg-white'}`}
+                            className={`group p-4 rounded-xl border transition-all duration-300 ${isLeading
+                              ? 'bg-gradient-to-r from-primary-50 to-sky-50 border-primary-100 shadow-sm'
+                              : 'bg-white border-slate-100 hover:border-primary-200 hover:shadow-sm'}`}
                           >
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between mb-3">
                               <div className="flex items-center gap-4">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold ${isLeading ? 'bg-gradient-to-br from-blue-500 to-cyan-500 text-white' : 'bg-gray-100 text-gray-700'}`}>
+                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg shadow-sm ${isLeading
+                                  ? 'bg-gradient-to-br from-primary-500 to-sky-500 text-white'
+                                  : 'bg-white border border-slate-200 text-slate-600'}`}>
                                   {index + 1}
                                 </div>
                                 <div>
-                                  <div className="font-semibold text-gray-800">{result.name}</div>
-                                  <div className="text-sm text-gray-500 flex items-center gap-2 mt-1">
+                                  <div className="font-bold text-slate-800 text-lg">{result.name}</div>
+                                  <div className="text-xs text-slate-500 flex items-center gap-1.5 font-medium">
                                     <Clock className="w-3 h-3" />
-                                    <span>Latest update: Today</span>
+                                    <span>Updated: Live</span>
                                   </div>
                                 </div>
                               </div>
 
                               <div className="text-right">
-                                <div className="font-bold text-gray-800">{result.votes.toLocaleString()} votes</div>
-                                <div className="text-sm text-gray-600">{percentage}%</div>
+                                <div className="font-bold text-slate-900 text-xl font-heading">{result.votes.toLocaleString()}</div>
+                                <div className="text-sm font-medium text-slate-500">{percentage}%</div>
                               </div>
                             </div>
 
                             {/* Progress Bar */}
-                            <div className="mt-3">
-                              <div className="flex justify-between text-xs text-gray-500 mb-1">
-                                <span>Vote Progress</span>
-                                <span>{percentage}%</span>
-                              </div>
-                              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                <motion.div
-                                  initial={{ width: 0 }}
-                                  animate={{ width: `${percentage}%` }}
-                                  transition={{ duration: 1, delay: index * 0.1 }}
-                                  className={`h-full ${isLeading ? 'bg-gradient-to-r from-blue-500 to-cyan-500' : 'bg-gradient-to-r from-gray-400 to-gray-500'}`}
-                                />
-                              </div>
+                            <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${percentage}%` }}
+                                transition={{ duration: 1, delay: index * 0.1 }}
+                                className={`h-full rounded-full ${isLeading
+                                  ? 'bg-gradient-to-r from-primary-500 to-sky-500'
+                                  : 'bg-slate-400'}`}
+                              />
                             </div>
                           </motion.div>
                         );
                       })}
                     </div>
                   </div>
-                </motion.div>
+                </div>
               )}
             </AnimatePresence>
           </div>
         </div>
 
         {/* Footer Status */}
-        <div className="flex flex-wrap items-center justify-between text-sm text-gray-500">
+        <div className="flex flex-wrap items-center justify-between text-xs font-medium text-slate-400 px-2 pb-4">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-              <span>Dashboard updated in real-time</span>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-success-500"></span>
+              </span>
+              <span className="text-slate-500">Real-time system active</span>
             </div>
             <span>•</span>
-            <span>Data source: Secure Election Database</span>
+            <span>Secure Connection (TLS 1.3)</span>
           </div>
           <div>
-            <span>Last refresh: {new Date().toLocaleTimeString('en-ET', { hour12: false })}</span>
+            <span>Refreshed: {new Date().toLocaleTimeString('en-ET', { hour12: false })}</span>
           </div>
         </div>
       </div>

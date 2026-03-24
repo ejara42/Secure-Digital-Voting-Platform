@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import NavBar from "./component/NavBar";
-import Footer from "./component/Footer";
+import NavBar from "./components/NavBar";
+import Footer from "./components/Footer";
 import "./i18n";
 
 // Pages
-import Home from "./page/home";
-import Login from "./page/Login";
-import Register from "./page/Register";
-import Ballots from "./page/Ballots";
-import Vote from "./page/Vote";
-import Candidates from "./page/Candidates";
-import Results from "./page/Results";
-import ForgotPassword from "./page/ForgotPassword";
-import ResetPassword from "./page/ResetPassword";
+import Home from "./pages/home";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Ballots from "./pages/Ballots";
+import Vote from "./pages/Vote";
+import Candidates from "./pages/Candidates";
+import Results from "./pages/Results";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 // Admin components
-import AdminRoute from "./component/AdminRoute";
-import ProtectedRoute from "./component/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
+import ProtectedRoute from "./components/ProtectedRoute";
 import AdminDashboard from "./admin/AdminDashboard";
 import AdminCandidates from "./admin/AdminCandidates";
 import AdminBallots from "./admin/AdminBallots";

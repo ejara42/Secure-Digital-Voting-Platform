@@ -33,6 +33,17 @@ API.interceptors.request.use(
 ====================================== */
 const handleError = (err) => {
   console.error("API Error:", err.response?.data || err.message);
+
+  // Handle 401 Unauthorized (invalid/expired token)
+  if (err.response?.status === 401) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    // Only redirect if not already on login page to avoid loops
+    if (!window.location.pathname.includes("/login")) {
+      window.location.href = "/login";
+    }
+  }
+
   throw err.response?.data || err;
 };
 
