@@ -13,6 +13,7 @@ import {
   BarElement,
 } from "chart.js";
 import { toast } from "react-hot-toast";
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 import {
   TrendingUp,
@@ -57,7 +58,10 @@ export default function Results() {
   const [lastUpdated, setLastUpdated] = useState(null);
 
   useEffect(() => {
-    if (!ballotId) return;
+    if (!ballotId) {
+      setLoading(false);
+      return;
+    }
 
     let active = true;
 
@@ -175,23 +179,35 @@ export default function Results() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-950">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <BarChart3 className="w-16 h-16 animate-spin text-blue-500" />
       </div>
     );
   }
 
+  if (!ballotId) {
+    return (
+      <div className="min-h-screen bg-white p-6 flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">No Ballot Selected</h1>
+          <p className="text-gray-600">Please select a ballot to view election results.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-950 p-6">
+    <div className="min-h-screen bg-white p-6">
       <div className="max-w-7xl mx-auto space-y-8">
 
         {/* HEADER */}
         <div className="text-center">
           <Trophy className="w-12 h-12 mx-auto text-yellow-400" />
-          <h1 className="text-4xl font-bold text-white mt-2">
+          <h1 className="text-4xl font-bold text-gray-800 mt-2">
             Live Election Results
           </h1>
-          <p className="text-gray-400">
+          <p className="text-gray-600">
             {socketConnected ? "Real-time connected" : "Offline"}
           </p>
           {lastUpdated && (
@@ -220,46 +236,52 @@ export default function Results() {
         </div>
 
         {/* TABLE */}
-        <div className="bg-gray-900 rounded-xl p-6">
+        <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
           <div className="flex justify-between mb-4">
-            <h2 className="text-xl font-bold text-white">Detailed Results</h2>
+            <h2 className="text-xl font-bold text-gray-800">Detailed Results</h2>
             <button
               onClick={exportCSV}
-              className="px-4 py-2 bg-emerald-600 text-white rounded-lg"
+              className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
             >
               Export CSV
             </button>
           </div>
 
           {results.length === 0 ? (
-            <div className="text-center text-gray-400 py-8">
+            <div className="text-center text-gray-500 py-8">
               <AlertCircle className="mx-auto mb-2" />
               No results available
             </div>
           ) : (
-            <table className="w-full text-left text-gray-300">
+            <table className="w-full text-left text-gray-700">
               <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Candidate</th>
-                  <th>Party</th>
-                  <th>Votes</th>
+                <tr className="border-b border-gray-200">
+                  <th className="pb-2">#</th>
+                  <th className="pb-2">Candidate</th>
+                  <th className="pb-2">Party</th>
+                  <th className="pb-2">Votes</th>
+                  <th className="pb-2">Percentage</th>
                 </tr>
               </thead>
               <tbody>
                 <AnimatePresence>
-                  {results.map((r, i) => (
-                    <motion.tr
-                      key={i}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                    >
-                      <td>{i + 1}</td>
-                      <td className="text-white">{r.candidateName}</td>
-                      <td>{r.party}</td>
-                      <td>{r.votes}</td>
-                    </motion.tr>
-                  ))}
+                  {results.map((r, i) => {
+                    const percentage = stats.totalVotes > 0 ? ((r.votes / stats.totalVotes) * 100).toFixed(2) : 0;
+                    return (
+                      <motion.tr
+                        key={i}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="border-b border-gray-100"
+                      >
+                        <td className="py-2">{i + 1}</td>
+                        <td className="py-2 font-medium text-gray-900">{r.candidateName}</td>
+                        <td className="py-2">{r.party}</td>
+                        <td className="py-2">{r.votes}</td>
+                        <td className="py-2">{percentage}%</td>
+                      </motion.tr>
+                    );
+                  })}
                 </AnimatePresence>
               </tbody>
             </table>
@@ -277,13 +299,14 @@ export default function Results() {
 
 /* ---------- Helpers ---------- */
 
-function StatCard({ icon: Icon, label, value }) {
+function StatCard({ icon, label, value }) {
+  const Icon = icon;
   return (
-    <div className="bg-gray-900 p-6 rounded-xl flex items-center gap-4">
-      <Icon className="w-8 h-8 text-blue-400" />
+    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
+      <Icon className="w-8 h-8 text-blue-500" />
       <div>
-        <div className="text-2xl font-bold text-white">{value}</div>
-        <div className="text-sm text-gray-400">{label}</div>
+        <div className="text-2xl font-bold text-gray-900">{value}</div>
+        <div className="text-sm text-gray-600">{label}</div>
       </div>
     </div>
   );
@@ -291,8 +314,8 @@ function StatCard({ icon: Icon, label, value }) {
 
 function ChartCard({ title, children }) {
   return (
-    <div className="bg-gray-900 p-6 rounded-xl">
-      <h3 className="text-white font-bold mb-4">{title}</h3>
+    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+      <h3 className="text-gray-800 font-bold mb-4">{title}</h3>
       <div className="h-72">{children}</div>
     </div>
   );

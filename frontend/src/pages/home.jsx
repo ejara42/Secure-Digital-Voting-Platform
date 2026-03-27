@@ -6,14 +6,34 @@ import {
   ChevronRight, Award, TrendingUp, Verified, Sparkles,
   Target, Star, Map, Activity, Heart, ShieldOff
 } from "lucide-react";
-import { motion, useAnimation, useInView, AnimatePresence } from "framer-motion";
+// eslint-disable-next-line no-unused-vars
+import { motion, useAnimation, AnimatePresence } from "framer-motion";
+
+// Simplified Clean Gray Background Component
+const BackgroundLayers = () => (
+  <>
+    {/* Clean Gray Gradient Background */}
+    <div className="fixed inset-0 z-0 bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200" />
+
+    {/* Subtle Grid Pattern */}
+    <div className="fixed inset-0 z-0 opacity-10">
+      <div className="absolute inset-0" style={{
+        backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.05) 1px, transparent 0)`,
+        backgroundSize: '40px 40px'
+      }}></div>
+    </div>
+
+    {/* Subtle Gradient Orbs */}
+    <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-gradient-to-r from-gray-300/20 to-gray-400/20 blur-3xl" />
+      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-gradient-to-r from-gray-400/10 to-gray-500/10 blur-3xl" />
+    </div>
+  </>
+);
 
 export default function Home() {
-  const [offsetY, setOffsetY] = useState(0);
   const [activeSection, setActiveSection] = useState("hero");
-  const [isHovered, setIsHovered] = useState(false);
   const [time, setTime] = useState(new Date());
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   // Animated counters
   const [votersCount, setVotersCount] = useState(0);
@@ -30,18 +50,6 @@ export default function Home() {
 
   const controls = useAnimation();
 
-  // Track mouse movement for subtle effects
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePosition({
-        x: e.clientX / window.innerWidth,
-        y: e.clientY / window.innerHeight
-      });
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
-
   // Real-time clock
   useEffect(() => {
     const timer = setInterval(() => {
@@ -54,7 +62,6 @@ export default function Home() {
   // scroll listener for active section
   useEffect(() => {
     const handleScroll = () => {
-      setOffsetY(window.pageYOffset);
       const scrollY = window.pageYOffset + 200;
       const fTop = featuresRef.current?.offsetTop || Infinity;
       const enTop = enbeRef.current?.offsetTop || Infinity;
@@ -94,28 +101,6 @@ export default function Home() {
   useEffect(() => {
     controls.start({ opacity: 1, y: 0, transition: { duration: 0.8 } });
   }, [controls]);
-
-  // Simplified Clean Gray Background
-  const BackgroundLayers = () => (
-    <>
-      {/* Clean Gray Gradient Background */}
-      <div className="fixed inset-0 z-0 bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200" />
-
-      {/* Subtle Grid Pattern */}
-      <div className="fixed inset-0 z-0 opacity-10">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.05) 1px, transparent 0)`,
-          backgroundSize: '40px 40px'
-        }}></div>
-      </div>
-
-      {/* Subtle Gradient Orbs */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-gradient-to-r from-gray-300/20 to-gray-400/20 blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-gradient-to-r from-gray-400/10 to-gray-500/10 blur-3xl" />
-      </div>
-    </>
-  );
 
   return (
     <div className="w-full text-gray-800 font-sans overflow-x-hidden relative">

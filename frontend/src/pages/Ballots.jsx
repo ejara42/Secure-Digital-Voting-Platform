@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api/api";
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Vote, Calendar, Users, Shield,
@@ -16,7 +17,6 @@ export default function BallotList() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    setLoading(true);
     API.get("/ballots")
       .then(res => {
         setBallots(res.data);
@@ -224,7 +224,7 @@ export default function BallotList() {
                       <div className="text-right">
                         <div className="flex items-center gap-1 text-sm text-gray-400">
                           <Users className="w-4 h-4" />
-                          <span>{ballot.voterCount || Math.floor(Math.random() * 10000)} voters</span>
+                          <span>{ballot.voterCount || 0} voters</span>
                         </div>
                       </div>
                     </div>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { castVote, checkVoteStatus } from "../api/api";
 import toast from "react-hot-toast";
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle, XCircle, Shield, Lock,

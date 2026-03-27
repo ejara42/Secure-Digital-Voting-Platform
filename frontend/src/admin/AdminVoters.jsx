@@ -43,7 +43,7 @@ export default function AdminVoters() {
 
   useEffect(() => {
     if (page > totalPages) setPage(1);
-  }, [totalPages]);
+  }, [totalPages, page]);
 
   return (
     <AdminLayout>

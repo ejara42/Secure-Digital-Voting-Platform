@@ -28,6 +28,7 @@ const app = express();
 ===================================================== */
 const allowedOrigins = [
     "http://localhost:5173",
+    "http://localhost:5174",
     "http://localhost:3000",
     process.env.FRONTEND_URL,
 ].filter(Boolean);
@@ -148,10 +149,21 @@ mongoose
     .connect(MONGO_URI)
     .then(() => {
         console.log("✅ MongoDB connected");
-        server.listen(PORT, () => {
-            console.log(`🚀 Backend running at http://localhost:${PORT}`);
-            console.log(`🌐 Environment: ${process.env.NODE_ENV || "development"}`);
-        });
+        const startServer = (port) => {
+            server.listen(port, () => {
+                console.log(`🚀 Backend running at http://localhost:${port}`);
+                console.log(`🌐 Environment: ${process.env.NODE_ENV || "development"}`);
+            }).on('error', (err) => {
+                if (err.code === 'EADDRINUSE') {
+                    console.log(`Port ${port} in use, trying ${port + 1}`);
+                    startServer(port + 1);
+                } else {
+                    console.error('Server error:', err);
+                    process.exit(1);
+                }
+            });
+        };
+        startServer(PORT);
     })
     .catch((err) => {
         console.error("MongoDB connection failed:", err.message);

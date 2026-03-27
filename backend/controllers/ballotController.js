@@ -50,6 +50,10 @@ const createBallot = async (req, res) => {
             });
         }
 
+        if (new Date(endDate) < new Date(startDate)) {
+            return res.status(400).json({ message: "End date must be on or after start date" });
+        }
+
         const ballot = await Ballot.create({
             title,
             electionName,
@@ -57,7 +61,7 @@ const createBallot = async (req, res) => {
             description,
             type: type || "Presidential",
             region: region || "Nationwide",
-            totalRegisteredVoters: totalRegisteredVoters || 0,
+            totalRegisteredVoters: Number(totalRegisteredVoters) || 0,
             startDate,
             endDate
         });

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
     LayoutDashboard,
@@ -18,14 +18,15 @@ import {
     Lock,
     Database
 } from "lucide-react";
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
 
 export default function AdminLayout({ children }) {
     const location = useLocation();
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [notifications] = useState(3); // Mock notification count
+    const [sessionId] = useState(() => Math.random().toString(36).substr(2, 9).toUpperCase());
 
     const navItems = [
         {
@@ -299,7 +300,7 @@ export default function AdminLayout({ children }) {
                             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
                             <span>Secure Connection • AES-256 Encrypted</span>
                         </div>
-                        <div className="hidden lg:block">Session ID: {Math.random().toString(36).substr(2, 9).toUpperCase()}</div>
+                        <div className="hidden lg:block">Session ID: {sessionId}</div>
                     </div>
                     <div className="flex items-center gap-4">
                         <span>© {new Date().getFullYear()} ENBE Admin System</span>

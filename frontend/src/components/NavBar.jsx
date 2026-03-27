@@ -10,7 +10,6 @@ export default function NavBar() {
 
   const [search, setSearch] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [userRole, setUserRole] = useState(localStorage.getItem("role") || null);
   const [langOpen, setLangOpen] = useState(false);
 
@@ -70,7 +69,7 @@ export default function NavBar() {
   });
 
   return (
-    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200 shadow-soft transition-all duration-300">
+    <header className="sticky top-0 z-50 bg-green-50/80 backdrop-blur-xl border-b border-green-200 shadow-soft transition-all duration-300">
       {/* TOP SECTION */}
       <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
 
@@ -100,33 +99,33 @@ export default function NavBar() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t("search_placeholder")}
-              className="input-field py-2 pr-10 w-64 bg-slate-50 border-slate-200 focus:bg-white text-sm rounded-full transition-all duration-300"
+              className="input-field py-2 pr-10 w-64 bg-white border-green-200 focus:bg-white text-sm rounded-full transition-all duration-300"
             />
-            <span className="absolute right-4 top-2.5 text-slate-400 group-focus-within:text-primary-500 transition-colors">🔍</span>
+            <span className="absolute right-4 top-2.5 text-slate-400 group-focus-within:text-green-500 transition-colors">🔍</span>
           </div>
 
           {/* LANGUAGE DROPDOWN */}
           <div className="relative" ref={langRef}>
             <button
               onClick={() => setLangOpen(!langOpen)}
-              className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-full text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all"
+              className="flex items-center gap-2 px-4 py-2 border border-green-200 rounded-full text-sm font-medium text-slate-700 hover:bg-green-100 hover:border-green-300 transition-all"
             >
               <span>🌐</span>
               <span className="uppercase">{i18n.language || "en"}</span>
             </button>
 
             <ul
-              className={`absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden transition-all duration-200 ${langOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
+              className={`absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-green-100 overflow-hidden transition-all duration-200 ${langOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
                 }`}
             >
               {["en", "am", "om"].map((lng) => (
                 <li
                   key={lng}
                   onClick={() => changeLanguage(lng)}
-                  className="px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm font-medium text-slate-700 hover:text-primary-600 transition-colors flex items-center justify-between"
+                  className="px-4 py-3 hover:bg-green-50 cursor-pointer text-sm font-medium text-slate-700 hover:text-green-600 transition-colors flex items-center justify-between"
                 >
                   <span>{lng === "en" ? "English" : lng === "am" ? "Amharic" : "Afan Oromo"}</span>
-                  {i18n.language === lng && <span className="text-primary-600">✓</span>}
+                  {i18n.language === lng && <span className="text-green-600">✓</span>}
                 </li>
               ))}
             </ul>
@@ -134,7 +133,7 @@ export default function NavBar() {
 
           {/* MOBILE MENU TOGGLE */}
           <button
-            className="md:hidden p-2 rounded-full hover:bg-slate-100 text-slate-600"
+            className="md:hidden p-2 rounded-full hover:bg-green-100 text-slate-600"
             onClick={() => setDrawerOpen(!drawerOpen)}
           >
             {drawerOpen ? "✖" : "☰"}
@@ -143,9 +142,9 @@ export default function NavBar() {
       </div>
 
       {/* DESKTOP NAV */}
-      <nav className="hidden md:block border-t border-slate-100 bg-slate-50/50">
+      <nav className="hidden md:block border-t border-green-100 bg-green-50" aria-label="Main navigation">
         <div className="max-w-7xl mx-auto px-6">
-          <ul className="flex gap-1 py-1 overflow-x-auto">
+          <ul className="flex justify-end gap-2 py-2 overflow-x-auto">
             {visibleLinks.map((item) => {
               const isActive = location.pathname === item.path;
               return (
@@ -153,26 +152,24 @@ export default function NavBar() {
                   {item.action ? (
                     <button
                       onClick={item.action}
-                      className="px-4 py-3 text-sm font-medium text-slate-600 hover:text-red-600 transition-colors"
+                      className="px-5 py-3 text-base font-medium text-slate-600 hover:text-red-600 transition-colors rounded-md hover:bg-green-100"
                     >
                       {item.name}
                     </button>
                   ) : (
                     <Link
-                        ? "border-primary-500 text-primary-700 bg-primary-50/50"
-                      : "border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100/50"
-                        }`}
+                      to={item.path}
+                      className={`block px-5 py-3 text-base font-medium border-b-2 transition-all duration-200 rounded-md hover:bg-green-100 ${isActive ? "border-green-500 text-green-700 bg-green-50/50" : "border-transparent text-slate-600 hover:text-slate-900 hover:bg-green-100/50"}`}
                     >
-                  {item.name}
-                </Link>
-              )
-            }
+                      {item.name}
+                    </Link>
+                  )}
                 </li>
-          );
+              );
             })}
-        </ul>
-      </div>
-    </nav>
+          </ul>
+        </div>
+      </nav>
 
       {/* MOBILE DRAWER */ }
   <div className={`fixed inset-0 z-50 md:hidden transition-opacity duration-300 ${drawerOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}>

@@ -46,10 +46,12 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
     try {
         const { identifier, password } = req.body;
+        console.log('Login attempt:', { identifier, passwordLength: password.length });
 
         const voter = await Voter.findOne({
             $or: [{ email: identifier }, { nationalId: identifier }],
         });
+        console.log('User found:', !!voter);
 
         if (!voter) {
             return res.status(401).json({
@@ -58,6 +60,7 @@ exports.login = async (req, res) => {
         }
 
         const match = await bcrypt.compare(password, voter.password);
+        console.log('Password match:', match);
         if (!match) {
             return res.status(401).json({
                 message: "Invalid credentials",

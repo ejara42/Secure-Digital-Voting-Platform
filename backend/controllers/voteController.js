@@ -64,7 +64,7 @@ exports.sendOTP = async (req, res) => {
         await AuditLog.create({
             event: "OTP_SENT",
             actor: voterId,
-            metadata: { electionId, channel: voter.phone ? "email+sms" : "email" },
+            meta: { electionId, channel: voter.phone ? "email+sms" : "email" },
         }).catch(() => {});
 
         res.json({ message: "OTP sent to your registered email and phone" });
@@ -90,12 +90,12 @@ exports.castVote = async (req, res) => {
         if (otp) {
             const otpRecord = await Otp.findOne({ voterId, electionId });
             if (!otpRecord) {
-                await AuditLog.create({ event: "VOTE_INVALID_OTP", actor: voterId, metadata: { electionId } }).catch(() => {});
+                await AuditLog.create({ event: "VOTE_INVALID_OTP", actor: voterId, meta: { electionId } }).catch(() => {});
                 return res.status(400).json({ message: "OTP not found. Request a new one." });
             }
             if (new Date() > otpRecord.expiresAt) {
                 await otpRecord.deleteOne();
-                await AuditLog.create({ event: "VOTE_INVALID_OTP", actor: voterId, metadata: { electionId, reason: "expired" } }).catch(() => {});
+                await AuditLog.create({ event: "VOTE_INVALID_OTP", actor: voterId, meta: { electionId, reason: "expired" } }).catch(() => {});
                 return res.status(400).json({ message: "OTP has expired. Please request a new one." });
             }
             if (otpRecord.otp !== otp) {
@@ -135,7 +135,7 @@ exports.castVote = async (req, res) => {
         await AuditLog.create({
             event: "VOTE_CAST",
             actor: voterId,
-            metadata: { electionId, candidateId },
+            meta: { electionId, candidateId },
         }).catch(() => {});
 
         res.json({ receipt, message: "Your vote has been recorded successfully." });

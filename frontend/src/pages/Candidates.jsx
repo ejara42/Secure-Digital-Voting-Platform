@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import API from "../api/api";
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 import { io } from "socket.io-client";
 import {
@@ -24,7 +25,7 @@ export default function Candidates() {
   const [chatCandidate, setChatCandidate] = useState(null);
   const [resultsMap, setResultsMap] = useState({});
 
-  const loadData = async (quiet = false) => {
+  const loadData = useCallback(async (quiet = false) => {
     if (!ballotId) return;
     if (!quiet) setLoading(true);
     else setIsRefreshing(true);
@@ -61,11 +62,11 @@ export default function Candidates() {
       setLoading(false);
       setIsRefreshing(false);
     }
-  };
+  }, [ballotId]);
 
   useEffect(() => {
     loadData();
-  }, [ballotId]);
+  }, [loadData]);
 
   // Real-time Updates
   useEffect(() => {
@@ -80,7 +81,7 @@ export default function Candidates() {
     });
 
     return () => socket.disconnect();
-  }, [ballotId]);
+  }, [ballotId, loadData]);
 
   const handleVoteClick = (candidateId) => {
     navigate(`/vote/${ballotId}/${candidateId}`);
@@ -359,16 +360,29 @@ export default function Candidates() {
                       </motion.button>
 
                       {/* Vote Button */}
-                      <motion.button
-                        onClick={() => handleVoteClick(candidate._id)}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 text-white font-semibold flex items-center justify-center gap-3 hover:shadow-xl transition-all group/btn"
-                      >
-                        <Vote className="w-5 h-5" />
-                        <span>Select & Vote</span>
-                        <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
-                      </motion.button>
+                      {ballotInfo?.status === 'completed' ? (
+                        <motion.button
+                          onClick={() => navigate(`/results/${ballotId}`)}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold flex items-center justify-center gap-3 hover:shadow-xl transition-all group/btn"
+                        >
+                          <Award className="w-5 h-5" />
+                          <span>View Full Results</span>
+                          <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                        </motion.button>
+                      ) : (
+                        <motion.button
+                          onClick={() => handleVoteClick(candidate._id)}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 text-white font-semibold flex items-center justify-center gap-3 hover:shadow-xl transition-all group/btn"
+                        >
+                          <Vote className="w-5 h-5" />
+                          <span>Select & Vote</span>
+                          <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                        </motion.button>
+                      )}
                     </div>
 
                     {/* Selection Indicator */}

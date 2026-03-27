@@ -4,15 +4,17 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
 let mongoServer;
 
 beforeAll(async () => {
-  // start in-memory mongo
-  mongoServer = await MongoMemoryServer.create({ instance: { dbName: 'test' } });
-  const uri = mongoServer.getUri();
+  // Only start mongo if not already connected (e.g., from test files)
+  if (mongoose.connection.readyState === 0) {
+    mongoServer = await MongoMemoryServer.create({ instance: { dbName: 'test' } });
+    const uri = mongoServer.getUri();
 
-  // connect mongoose
-  await mongoose.connect(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+    // connect mongoose
+    await mongoose.connect(uri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+  }
 
   // set test-friendly env
   process.env.JWT_SECRET = process.env.JWT_SECRET || 'testsecret';

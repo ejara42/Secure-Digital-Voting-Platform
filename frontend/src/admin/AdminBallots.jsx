@@ -66,12 +66,31 @@ export default function AdminBallots() {
 
     // ================= SUBMIT =================
     const onSubmit = async (data) => {
+        if (!data.title || !data.electionName || !data.year || !data.startDate || !data.endDate) {
+            toast.error("Please fill all required fields (Title, Election Name, Year, Start Date, End Date)");
+            return;
+        }
+
+        const start = new Date(data.startDate);
+        const end = new Date(data.endDate);
+        if (end < start) {
+            toast.error("End date must be the same or later than start date");
+            return;
+        }
+
+        const payload = {
+            ...data,
+            totalRegisteredVoters: Number(data.totalRegisteredVoters) || 0,
+            startDate: start.toISOString(),
+            endDate: end.toISOString(),
+        };
+
         try {
             if (editing) {
-                await API.put(`/ballots/${editing._id}`, data);
+                await API.put(`/ballots/${editing._id}`, payload);
                 toast.success("Ballot updated successfully");
             } else {
-                await API.post("/ballots", data);
+                await API.post("/ballots", payload);
                 toast.success("Ballot created successfully");
             }
             setModalOpen(false);
@@ -215,7 +234,7 @@ export default function AdminBallots() {
                         className="w-full border p-2 rounded"
                     />
 
-                    <button className="bg-blue-600 text-white px-4 py-2 rounded w-full">
+                    <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded w-full">
                         Save
                     </button>
                 </form>

@@ -45,6 +45,7 @@ export default function App() {
           <Route path="/ballots" element={<Ballots />} />
           <Route path="/ballots/:ballotId/candidates" element={<Candidates />} />
           <Route path="/results" element={<Results />} />
+          <Route path="/results/:ballotId" element={<Results />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />

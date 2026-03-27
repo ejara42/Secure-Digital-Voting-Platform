@@ -1,5 +1,5 @@
 {
-  "name": "voter-backend",
+  "name": "secure-digital-voting-platform-backend",
   "version": "1.0.0",
   "description": "Backend for the Voter React app (Express + MongoDB)",
   "main": "server.js",

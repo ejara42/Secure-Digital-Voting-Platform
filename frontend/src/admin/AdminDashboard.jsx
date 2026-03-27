@@ -3,6 +3,7 @@ import AdminLayout from "./AdminLayout";
 import API from "../api/api";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Users, Vote, UserPlus, TrendingUp,

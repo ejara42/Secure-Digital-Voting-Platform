@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import AdminLayout from "./AdminLayout";
 import API from "../api/api";
 import toast from "react-hot-toast";
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 import {
   UserPlus, Users, Vote, FileText,
@@ -154,7 +155,7 @@ export default function AdminCandidates() {
       await API.delete(`/candidates/${candidateId}`);
       toast.success("Candidate deleted successfully");
       loadData();
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete candidate");
     }
   };
