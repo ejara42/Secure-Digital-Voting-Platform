@@ -1,6 +1,6 @@
 const Vote = require("../models/vote");
 const Candidate = require("../models/Candidate");
-const Voter = require("../models/voter");
+const Voter = require("../models/Voter");
 const Otp = require("../models/Otp");
 const AuditLog = require("../models/AuditLog");
 const crypto = require("crypto");
@@ -65,7 +65,7 @@ exports.sendOTP = async (req, res) => {
             event: "OTP_SENT",
             actor: voterId,
             meta: { electionId, channel: voter.phone ? "email+sms" : "email" },
-        }).catch(() => {});
+        }).catch(() => { });
 
         res.json({ message: "OTP sent to your registered email and phone" });
     } catch (err) {
@@ -90,16 +90,16 @@ exports.castVote = async (req, res) => {
         if (otp) {
             const otpRecord = await Otp.findOne({ voterId, electionId });
             if (!otpRecord) {
-                await AuditLog.create({ event: "VOTE_INVALID_OTP", actor: voterId, meta: { electionId } }).catch(() => {});
+                await AuditLog.create({ event: "VOTE_INVALID_OTP", actor: voterId, meta: { electionId } }).catch(() => { });
                 return res.status(400).json({ message: "OTP not found. Request a new one." });
             }
             if (new Date() > otpRecord.expiresAt) {
                 await otpRecord.deleteOne();
-                await AuditLog.create({ event: "VOTE_INVALID_OTP", actor: voterId, meta: { electionId, reason: "expired" } }).catch(() => {});
+                await AuditLog.create({ event: "VOTE_INVALID_OTP", actor: voterId, meta: { electionId, reason: "expired" } }).catch(() => { });
                 return res.status(400).json({ message: "OTP has expired. Please request a new one." });
             }
             if (otpRecord.otp !== otp) {
-                await AuditLog.create({ event: "VOTE_INVALID_OTP", actor: voterId, metadata: { electionId, reason: "wrong_otp" } }).catch(() => {});
+                await AuditLog.create({ event: "VOTE_INVALID_OTP", actor: voterId, metadata: { electionId, reason: "wrong_otp" } }).catch(() => { });
                 return res.status(400).json({ message: "Invalid OTP." });
             }
             await otpRecord.deleteOne(); // consume OTP
@@ -136,7 +136,7 @@ exports.castVote = async (req, res) => {
             event: "VOTE_CAST",
             actor: voterId,
             meta: { electionId, candidateId },
-        }).catch(() => {});
+        }).catch(() => { });
 
         res.json({ receipt, message: "Your vote has been recorded successfully." });
     } catch (err) {
