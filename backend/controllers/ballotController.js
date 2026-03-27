@@ -37,6 +37,9 @@ const createBallot = async (req, res) => {
             electionName,
             year,
             description,
+            type,
+            region,
+            totalRegisteredVoters,
             startDate,
             endDate
         } = req.body;
@@ -52,6 +55,9 @@ const createBallot = async (req, res) => {
             electionName,
             year,
             description,
+            type: type || "Presidential",
+            region: region || "Nationwide",
+            totalRegisteredVoters: totalRegisteredVoters || 0,
             startDate,
             endDate
         });
@@ -61,8 +67,45 @@ const createBallot = async (req, res) => {
         console.error("createBallot error:", err);
         res.status(500).json({ message: "Server error" });
     }
+};/**
+ * UPDATE BALLOT
+ */
+const updateBallot = async (req, res) => {
+    try {
+        const ballot = await Ballot.findById(req.params.id);
+        if (!ballot) return res.status(404).json({ message: "Ballot not found" });
+
+        Object.assign(ballot, req.body);
+        await ballot.save();
+
+        res.json(ballot);
+    } catch (err) {
+        console.error("updateBallot error:", err);
+        res.status(500).json({ message: "Server error" });
+    }
 };
 
+/**
+ * DELETE BALLOT
+ */
+const deleteBallot = async (req, res) => {
+    try {
+        const ballot = await Ballot.findById(req.params.id);
+        if (!ballot) return res.status(404).json({ message: "Ballot not found" });
+
+        // Check if candidates are attached
+        const hasCandidates = await Candidate.exists({ ballot: req.params.id });
+        if (hasCandidates) {
+            return res.status(400).json({ message: "Cannot delete ballot with attached candidates" });
+        }
+
+        await ballot.deleteOne();
+        res.json({ message: "Ballot deleted" });
+    } catch (err) {
+        console.error("deleteBallot error:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+};
 
 /**
  * GET CANDIDATES FOR A BALLOT
@@ -101,6 +144,8 @@ module.exports = {
     listBallots,
     ballotDropdown,
     createBallot,
+    updateBallot,
+    deleteBallot,
     ballotCandidates,
     getBallot,
 };

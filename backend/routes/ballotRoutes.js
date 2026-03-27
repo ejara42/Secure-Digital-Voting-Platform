@@ -14,7 +14,8 @@ const {
 router.get("/", listBallots);
 router.get("/dropdown", ballotDropdown);
 router.get("/:id/candidates", ballotCandidates);
-router.get("/:id/meta", getBallot);
+router.get("/:id/meta", getBallot);  // legacy alias
+router.get("/:id", getBallot);       // ← NEW: fixes 404 from Candidates.jsx
 
 // ADMIN
 router.post("/", auth, adminOnly, createBallot);

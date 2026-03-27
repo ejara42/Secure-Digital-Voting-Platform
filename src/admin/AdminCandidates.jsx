@@ -21,6 +21,10 @@ export default function AdminCandidates() {
     name: "",
     party: "",
     description: "",
+    manifesto: "",
+    position: "Presidential Candidate",
+    region: "Nationwide",
+    slogan: "",
     ballot: "",
   });
 
@@ -94,6 +98,10 @@ export default function AdminCandidates() {
     data.append("name", form.name);
     data.append("party", form.party);
     data.append("description", form.description);
+    data.append("manifesto", form.manifesto);
+    data.append("position", form.position);
+    data.append("region", form.region);
+    data.append("slogan", form.slogan);
     data.append("ballot", form.ballot);
     if (photo) data.append("photo", photo);
 
@@ -113,6 +121,10 @@ export default function AdminCandidates() {
         name: "",
         party: "",
         description: "",
+        manifesto: "",
+        position: "Presidential Candidate",
+        region: "Nationwide",
+        slogan: "",
         ballot: "",
       });
       removePhoto();
@@ -322,11 +334,60 @@ export default function AdminCandidates() {
                           ))}
                         </select>
                       </div>
+
+                      {/* Position Field */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <div className="flex items-center gap-2">
+                            <Briefcase className="w-4 h-4" />
+                            Candidate Position
+                          </div>
+                        </label>
+                        <input
+                          name="position"
+                          placeholder="e.g. Presidential Candidate"
+                          value={form.position}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        />
+                      </div>
+                      {/* Region Field */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <div className="flex items-center gap-2">
+                            <Globe className="w-4 h-4" />
+                            Representation Region
+                          </div>
+                        </label>
+                        <input
+                          name="region"
+                          placeholder="e.g. Nationwide, Addis Ababa, Oromia"
+                          value={form.region}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        />
+                      </div>
+
+                      {/* Slogan Field */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <div className="flex items-center gap-2">
+                            <Shield className="w-4 h-4" />
+                            Campaign Slogan
+                          </div>
+                        </label>
+                        <input
+                          name="slogan"
+                          placeholder="Short slogan for the campaign"
+                          value={form.slogan}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        />
+                      </div>
                     </div>
 
                     {/* Right Column - Photo Upload */}
                     <div className="space-y-6">
-                      {/* Photo Upload */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           <div className="flex items-center gap-2">
@@ -377,22 +438,43 @@ export default function AdminCandidates() {
                     </div>
                   </div>
 
-                  {/* Description Field */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      <div className="flex items-center gap-2">
-                        <FileText className="w-4 h-4" />
-                        Candidate Description
-                      </div>
-                    </label>
-                    <textarea
-                      name="description"
-                      placeholder="Enter candidate biography, achievements, and campaign promises..."
-                      value={form.description}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all min-h-[120px]"
-                      rows={4}
-                    />
+                  {/* Description and Manifesto Row */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Description Field */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-4 h-4" />
+                          Short Biography
+                        </div>
+                      </label>
+                      <textarea
+                        name="description"
+                        placeholder="Brief candidate biography (shows in cards)..."
+                        value={form.description}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all min-h-[120px]"
+                        rows={4}
+                      />
+                    </div>
+
+                    {/* Manifesto Field */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <div className="flex items-center gap-2">
+                          <Award className="w-4 h-4" />
+                          Detailed Manifesto
+                        </div>
+                      </label>
+                      <textarea
+                        name="manifesto"
+                        placeholder="Full platform details for voters and AI spokesperson..."
+                        value={form.manifesto}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all min-h-[120px]"
+                        rows={4}
+                      />
+                    </div>
                   </div>
 
                   {/* Form Actions */}
@@ -549,11 +631,11 @@ export default function AdminCandidates() {
                               <div className="grid grid-cols-2 gap-3 mt-4">
                                 <div className="flex items-center gap-2 text-sm text-gray-500">
                                   <Briefcase className="w-4 h-4" />
-                                  <span>Candidate</span>
+                                  <span>{candidate.position || "Candidate"}</span>
                                 </div>
                                 <div className="flex items-center gap-2 text-sm text-gray-500">
                                   <Globe className="w-4 h-4" />
-                                  <span>Registered</span>
+                                  <span>{candidate.region || "Nationwide"}</span>
                                 </div>
                               </div>
                             </div>

@@ -1,3 +1,33 @@
+# Secure Digital Voting Platform
+
+## Project layout (separated frontend/backend)
+
+- `backend/` : Express API + MongoDB server code (`backend/package.json`)
+- `frontend/`: React + Vite client app (`frontend/package.json`)
+
+### Run frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### Run backend
+
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+### Results route
+
+- Public results route (ballot score card): `/results` (no ballot selected state)
+- Ballot-specific results route: `/results/:ballotId` (live/result data)
+
+---
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

@@ -159,63 +159,62 @@ export default function NavBar() {
                     </button>
                   ) : (
                     <Link
-                      to={item.path}
-                      className={`block px-4 py-3 text-sm font-medium border-b-2 transition-all duration-200 ${isActive
                         ? "border-primary-500 text-primary-700 bg-primary-50/50"
-                        : "border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100/50"
+                      : "border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100/50"
                         }`}
                     >
-                      {item.name}
-                    </Link>
-                  )}
+                  {item.name}
+                </Link>
+              )
+            }
                 </li>
-              );
+          );
             })}
-          </ul>
+        </ul>
+      </div>
+    </nav>
+
+      {/* MOBILE DRAWER */ }
+  <div className={`fixed inset-0 z-50 md:hidden transition-opacity duration-300 ${drawerOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}>
+    {/* Backdrop */}
+    <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm" onClick={() => setDrawerOpen(false)} />
+
+    {/* Drawer Content */}
+    <div className={`absolute top-0 left-0 w-[80%] max-w-sm h-full bg-white shadow-2xl transition-transform duration-300 ${drawerOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <div className="p-6 space-y-6">
+        <div className="flex items-center gap-3 pb-6 border-b border-slate-100">
+          <Logo size={40} />
+          <div className="font-heading font-bold text-lg text-slate-900">Ethiopia Election</div>
         </div>
-      </nav>
 
-      {/* MOBILE DRAWER */}
-      <div className={`fixed inset-0 z-50 md:hidden transition-opacity duration-300 ${drawerOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}>
-        {/* Backdrop */}
-        <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm" onClick={() => setDrawerOpen(false)} />
-
-        {/* Drawer Content */}
-        <div className={`absolute top-0 left-0 w-[80%] max-w-sm h-full bg-white shadow-2xl transition-transform duration-300 ${drawerOpen ? "translate-x-0" : "-translate-x-full"}`}>
-          <div className="p-6 space-y-6">
-            <div className="flex items-center gap-3 pb-6 border-b border-slate-100">
-              <Logo size={40} />
-              <div className="font-heading font-bold text-lg text-slate-900">Ethiopia Election</div>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              {visibleLinks.map((item) => (
-                item.action ? (
-                  <button
-                    key={item.name}
-                    onClick={() => { item.action(); setDrawerOpen(false); }}
-                    className="w-full text-left px-4 py-3 rounded-xl text-slate-600 hover:bg-red-50 hover:text-red-700 transition-colors font-medium"
-                  >
-                    {item.name}
-                  </button>
-                ) : (
-                  <Link
-                    key={item.name}
-                    to={item.path}
-                    onClick={() => setDrawerOpen(false)}
-                    className={`block px-4 py-3 rounded-xl font-medium transition-all ${location.pathname === item.path
-                      ? "bg-primary-50 text-primary-700"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                      }`}
-                  >
-                    {item.name}
-                  </Link>
-                )
-              ))}
-            </div>
-          </div>
+        <div className="flex flex-col gap-2">
+          {visibleLinks.map((item) => (
+            item.action ? (
+              <button
+                key={item.name}
+                onClick={() => { item.action(); setDrawerOpen(false); }}
+                className="w-full text-left px-4 py-3 rounded-xl text-slate-600 hover:bg-red-50 hover:text-red-700 transition-colors font-medium"
+              >
+                {item.name}
+              </button>
+            ) : (
+              <Link
+                key={item.name}
+                to={item.path}
+                onClick={() => setDrawerOpen(false)}
+                className={`block px-4 py-3 rounded-xl font-medium transition-all ${location.pathname === item.path
+                  ? "bg-primary-50 text-primary-700"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  }`}
+              >
+                {item.name}
+              </Link>
+            )
+          ))}
         </div>
       </div>
-    </header>
+    </div>
+  </div>
+    </header >
   );
 }

@@ -11,7 +11,7 @@ exports.getResults = async (req, res) => {
         }
 
         const results = await Vote.aggregate([
-            { $match: { ballot: new mongoose.Types.ObjectId(ballotId) } },
+            { $match: { election: new mongoose.Types.ObjectId(ballotId) } },
 
             { $group: { _id: "$candidate", votes: { $sum: 1 } } },
 

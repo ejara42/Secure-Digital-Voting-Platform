@@ -33,32 +33,45 @@ exports.getCandidatesByBallot = async (req, res) => {
 // CREATE a new candidate (admin)
 exports.createCandidate = async (req, res) => {
     try {
-        const { name, party, ballot, description, vision } = req.body;
+    const {
+      name,
+      party,
+      ballot,
+      description,
+      manifesto,
+      vision,
+      position,
+      region,
+      slogan
+    } = req.body;
 
-        if (!name || !party || !ballot) {
-            return res.status(400).json({ message: "Missing required fields" });
-        }
+    if (!name || !party || !ballot) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
 
-        // Validate ballot exists
-        const ballotExists = await Ballot.findById(ballot);
-        if (!ballotExists) {
-            return res.status(400).json({ message: "Invalid ballot" });
-        }
+    // Validate ballot exists
+    const ballotExists = await Ballot.findById(ballot);
+    if (!ballotExists) {
+      return res.status(400).json({ message: "Invalid ballot" });
+    }
 
-        // Prevent duplicate candidate in same ballot
-        const duplicate = await Candidate.findOne({ name, ballot });
-        if (duplicate) {
-            return res.status(400).json({ message: "Candidate already exists in this ballot" });
-        }
+    // Prevent duplicate candidate in same ballot
+    const duplicate = await Candidate.findOne({ name, ballot });
+    if (duplicate) {
+      return res.status(400).json({ message: "Candidate already exists in this ballot" });
+    }
 
-        const candidateData = {
-            name,
-            party,
-            ballot,
-            description,
-            vision,
-            photo: req.file?.filename
-        };
+    const candidateData = {
+      name,
+      party,
+      ballot,
+      description,
+      manifesto: manifesto || vision, // vision is a common alias
+      position: position || "Presidential Candidate",
+      region: region || "Nationwide",
+      slogan,
+      photo: req.file?.filename
+    };
 
         const candidate = await Candidate.create(candidateData);
         res.status(201).json(candidate);
@@ -74,7 +87,13 @@ exports.updateCandidate = async (req, res) => {
         const candidate = await Candidate.findById(req.params.id);
         if (!candidate) return res.status(404).json({ message: "Candidate not found" });
 
-        const { name, ballot } = req.body;
+        const { name, ballot, vision, manifesto } = req.body;
+        
+        // Map vision to manifesto if provided
+        if (vision && !manifesto) {
+            req.body.manifesto = vision;
+        }
+
         if (name || ballot) {
             // Prevent duplicate on update
             const duplicate = await Candidate.findOne({

@@ -36,8 +36,11 @@ export default function AdminBallots() {
         reset({
             title: "",
             electionName: "",
-            year: "",
+            year: "2024",
             description: "",
+            type: "Presidential",
+            region: "Nationwide",
+            totalRegisteredVoters: 0,
             startDate: "",
             endDate: ""
         });
@@ -52,6 +55,9 @@ export default function AdminBallots() {
             electionName: ballot.electionName,
             year: ballot.year,
             description: ballot.description || "",
+            type: ballot.type || "Presidential",
+            region: ballot.region || "Nationwide",
+            totalRegisteredVoters: ballot.totalRegisteredVoters || 0,
             startDate: ballot.startDate?.slice(0, 10),
             endDate: ballot.endDate?.slice(0, 10)
         });
@@ -162,9 +168,39 @@ export default function AdminBallots() {
 
                     <textarea
                         {...register("description")}
-                        placeholder="Description"
+                        placeholder="Description / Purpose of this ballot"
                         className="w-full border p-2 rounded"
+                        rows={3}
                     />
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <select
+                            {...register("type", { required: true })}
+                            className="border p-2 rounded"
+                        >
+                            <option value="Presidential">Presidential</option>
+                            <option value="Parliamentary">Parliamentary</option>
+                            <option value="Local">Local</option>
+                            <option value="Referendum">Referendum</option>
+                            <option value="Other">Other</option>
+                        </select>
+
+                        <input
+                            {...register("region")}
+                            placeholder="Region (e.g. Nationwide)"
+                            className="border p-2 rounded"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="text-xs text-gray-500 mb-1 block">Total Registered Voters</label>
+                        <input
+                            type="number"
+                            {...register("totalRegisteredVoters")}
+                            placeholder="e.g. 1000000"
+                            className="w-full border p-2 rounded"
+                        />
+                    </div>
 
                     {/* ✅ REQUIRED DATES */}
                     <input

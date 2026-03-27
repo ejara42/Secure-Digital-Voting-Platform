@@ -2,49 +2,84 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import API from "../api/api";
 import { motion, AnimatePresence } from "framer-motion";
+import { io } from "socket.io-client";
 import {
   User, Vote, Shield, Award,
   Users, CheckCircle, Loader2,
   AlertCircle, Flag, Briefcase,
   ArrowRight, Building, Globe,
-  Target, Star, Crown
+  Target, Star, Crown, MessageSquare,
+  RefreshCw
 } from "lucide-react";
+import CandidateChat from "../components/CandidateChat";
 
 export default function Candidates() {
   const { ballotId } = useParams();
   const navigate = useNavigate();
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [ballotInfo, setBallotInfo] = useState(null);
+  const [chatCandidate, setChatCandidate] = useState(null);
+  const [resultsMap, setResultsMap] = useState({});
+
+  const loadData = async (quiet = false) => {
+    if (!ballotId) return;
+    if (!quiet) setLoading(true);
+    else setIsRefreshing(true);
+
+    try {
+      const [candidatesRes, ballotRes, resultsRes] = await Promise.all([
+        API.get(`/candidates/${ballotId}`),
+        API.get(`/ballots/${ballotId}`).catch(() => ({ data: null })),
+        API.get(`/results/${ballotId}`).catch(() => ({ data: null })),
+      ]);
+
+      setCandidates(candidatesRes.data);
+      setBallotInfo(ballotRes.data);
+
+      if (resultsRes.data?.results) {
+        const { results, totalVotes } = resultsRes.data;
+        const map = {};
+        results.forEach((r) => {
+          const id = r.candidateId?.toString() || r._id?.toString();
+          if (id) {
+            map[id] = {
+              votes: r.votes || 0,
+              percentage: totalVotes > 0 ? Math.round((r.votes / totalVotes) * 100) : 0,
+            };
+          }
+        });
+        setResultsMap(map);
+      }
+      setError(null);
+    } catch (err) {
+      console.error(err);
+      if (!quiet) setError("Failed to load candidates. Please try again.");
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  };
 
   useEffect(() => {
+    loadData();
+  }, [ballotId]);
+
+  // Real-time Updates
+  useEffect(() => {
     if (!ballotId) return;
+    const socket = io(import.meta.env.VITE_API_URL || "http://localhost:5000");
 
-    setLoading(true);
+    socket.on("resultsUpdated", (data) => {
+      if (data.electionId === ballotId) {
+        console.log("⚡ Real-time update received!");
+        loadData(true);
+      }
+    });
 
-    // Fetch candidates
-    API.get(`/candidates/${ballotId}`)
-      .then(res => {
-        setCandidates(res.data);
-        setError(null);
-      })
-      .catch(err => {
-        console.error(err);
-        setError("Failed to load candidates. Please try again.");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-
-    // Fetch ballot info for context
-    API.get(`/ballots/${ballotId}`)
-      .then(res => {
-        setBallotInfo(res.data);
-      })
-      .catch(() => {
-        // Silently fail for ballot info - it's optional
-      });
+    return () => socket.disconnect();
   }, [ballotId]);
 
   const handleVoteClick = (candidateId) => {
@@ -84,9 +119,22 @@ export default function Candidates() {
               <Users className="relative w-12 h-12 text-blue-400" />
             </div>
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
-                Election Candidates
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
+                  Election Candidates
+                </h1>
+                {isRefreshing && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.5 }}
+                    className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-blue-500/20 border border-blue-500/30 ml-2"
+                  >
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></div>
+                    <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider">Live Syncing</span>
+                  </motion.div>
+                )}
+              </div>
               <p className="text-gray-400 mt-2">
                 {ballotInfo?.title || "Presidential Election 2024"}
               </p>
@@ -273,21 +321,42 @@ export default function Candidates() {
                         </div>
                       </div>
 
-                      {/* Candidate Stats */}
-                      <div className="grid grid-cols-2 gap-3 mb-6">
-                        <div className="p-3 rounded-xl bg-gray-800/50 text-center">
-                          <div className="text-2xl font-bold text-white">
-                            {Math.floor(Math.random() * 100)}%
+                      {/* Candidate Stats — Real Data */}
+                      {(() => {
+                        const stats = resultsMap[candidate._id?.toString()];
+                        return (
+                          <div className="grid grid-cols-2 gap-3 mb-6">
+                            <div className="p-3 rounded-xl bg-gray-800/50 text-center">
+                              <div className="text-2xl font-bold text-emerald-400">
+                                {stats ? `${stats.percentage}%` : "—"}
+                              </div>
+                              <div className="text-xs text-gray-400">Vote Share</div>
+                            </div>
+                            <div className="p-3 rounded-xl bg-gray-800/50 text-center">
+                              <div className="text-2xl font-bold text-blue-400">
+                                {stats ? stats.votes.toLocaleString() : "0"}
+                              </div>
+                              <div className="text-xs text-gray-400">Votes Received</div>
+                            </div>
                           </div>
-                          <div className="text-xs text-gray-400">Poll Rating</div>
-                        </div>
-                        <div className="p-3 rounded-xl bg-gray-800/50 text-center">
-                          <div className="text-2xl font-bold text-white">
-                            {Math.floor(Math.random() * 1000)}
-                          </div>
-                          <div className="text-xs text-gray-400">Supporters</div>
-                        </div>
-                      </div>
+                        );
+                      })()}
+
+                      {/* AI Chat Button */}
+                      <motion.button
+                        onClick={() => setChatCandidate(candidate)}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="w-full py-2.5 rounded-xl border font-semibold flex items-center justify-center gap-2 transition-all mb-2 group/ai"
+                        style={{
+                          background: "rgba(99,102,241,0.08)",
+                          borderColor: "rgba(99,102,241,0.4)",
+                          color: "#a5b4fc",
+                        }}
+                      >
+                        <MessageSquare className="w-4 h-4" />
+                        <span>Ask AI Representative</span>
+                      </motion.button>
 
                       {/* Vote Button */}
                       <motion.button
@@ -374,6 +443,16 @@ export default function Candidates() {
             </div>
           </motion.div>
         )}
+
+        {/* AI Chat Modal */}
+        <AnimatePresence>
+          {chatCandidate && (
+            <CandidateChat
+              candidate={chatCandidate}
+              onClose={() => setChatCandidate(null)}
+            />
+          )}
+        </AnimatePresence>
 
         {/* Back Button */}
         <div className="mt-8">
