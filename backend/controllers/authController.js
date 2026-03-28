@@ -123,16 +123,29 @@ exports.forgotPassword = async (req, res) => {
 
         const { sendEmail } = require("../utils/email");
         
-        await sendEmail({
-            to: voter.email,
-            subject: "Password Reset",
-            html: `
-                <h3>Password Reset Request</h3>
-                <p>Click the link below to reset your password:</p>
-                <a href="${resetURL}">${resetURL}</a>
-                <p>This link expires in 15 minutes.</p>
-            `,
-        });
+        console.log(`📩 Processing forgot password for: ${voter.email}`);
+        
+        try {
+            await sendEmail({
+                to: voter.email,
+                subject: "Password Reset",
+                html: `
+                    <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+                        <h2 style="color: #2563eb;">Password Reset Request</h2>
+                        <p>We received a request to reset your password for the Secure Digital Voting Platform.</p>
+                        <p>Click the button below to set a new password:</p>
+                        <a href="${resetURL}" style="display: inline-block; padding: 12px 24px; background-color: #2563eb; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;">Reset Password</a>
+                        <p style="margin-top: 20px; font-size: 0.9em; color: #666;">Or copy and paste this link into your browser:</p>
+                        <p style="word-break: break-all; font-size: 0.8em; color: #000;">${resetURL}</p>
+                        <p style="margin-top: 20px; border-top: 1px solid #eee; pt-10px; font-size: 0.8em; color: #999;">This link expires in 15 minutes. If you didn't request this, you can safely ignore this email.</p>
+                    </div>
+                `,
+            });
+        } catch (emailErr) {
+            // Log the error but don't crash or return 500 if we want to remain "graceful"
+            // Actually, if we want the user to KNOW it failed (on the server side at least)
+            console.error("❌ Email send process aborted due to error:", emailErr.message);
+        }
 
         return res.json({
             message: "If the account exists, an email was sent.",
