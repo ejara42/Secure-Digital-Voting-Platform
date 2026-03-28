@@ -16,7 +16,7 @@ import API from "../api/api"; // Use API helper
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "https://secure-digital-voting-platform.onrender.com";
 
 export default function AdminResults({ electionId }) {
   const [results, setResults] = useState([]);

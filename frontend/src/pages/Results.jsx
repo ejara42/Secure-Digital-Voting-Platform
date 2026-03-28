@@ -42,7 +42,7 @@ ChartJS.register(
 );
 
 const SOCKET_URL =
-  import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
+  import.meta.env.VITE_SOCKET_URL || "https://secure-digital-voting-platform.onrender.com";
 
 export default function Results() {
   const { ballotId } = useParams();

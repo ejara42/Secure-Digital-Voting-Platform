@@ -18,7 +18,7 @@ export default function ForgotPassword() {
 
         setLoading(true);
         try {
-            await axios.post("http://localhost:5000/api/auth/forgot-password", { identifier: identifier.trim() });
+            await axios.post("https://secure-digital-voting-platform.onrender.com/api/auth/forgot-password", { identifier: identifier.trim() });
             setSent(true);
         } catch (err) {
             console.error(err);

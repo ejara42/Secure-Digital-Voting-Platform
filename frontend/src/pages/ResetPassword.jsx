@@ -34,7 +34,7 @@ export default function ResetPassword() {
 
         setLoading(true);
         try {
-            await axios.post("http://localhost:5000/api/auth/reset-password", {
+            await axios.post("https://secure-digital-voting-platform.onrender.com/api/auth/reset-password", {
                 userId,
                 token,
                 newPassword: password,

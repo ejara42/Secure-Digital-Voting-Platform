@@ -98,7 +98,7 @@ export default function VoterRegister() {
         setSuccessMsg("");
 
         try {
-            await axios.post("http://localhost:5000/api/auth/register", data);
+            await axios.post("https://secure-digital-voting-platform.onrender.com/api/auth/register", data);
 
             setSuccessMsg("Registration successful. Redirecting...");
             reset();

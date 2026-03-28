@@ -17,7 +17,7 @@ import { io } from "socket.io-client";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "https://secure-digital-voting-platform.onrender.com";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({ voters: 0, votes: 0, candidates: 0 });

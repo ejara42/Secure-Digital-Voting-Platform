@@ -71,7 +71,7 @@ export default function Candidates() {
   // Real-time Updates
   useEffect(() => {
     if (!ballotId) return;
-    const socket = io(import.meta.env.VITE_API_URL || "http://localhost:5000");
+    const socket = io(import.meta.env.VITE_API_URL || "https://secure-digital-voting-platform.onrender.com");
 
     socket.on("resultsUpdated", (data) => {
       if (data.electionId === ballotId) {
