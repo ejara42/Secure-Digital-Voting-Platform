@@ -1,4 +1,5 @@
 const Vote = require("../models/Vote");
+const Voter = require("../models/Voter");
 const mongoose = require("mongoose");
 
 // GET /api/results/:ballotId
@@ -44,12 +45,14 @@ exports.getResults = async (req, res) => {
         ]);
 
         const totalVotes = results.reduce((sum, r) => sum + r.votes, 0);
+        const totalVoters = await Voter.countDocuments({ role: "voter" });
+        const turnoutPercent = totalVoters > 0 ? ((totalVotes / totalVoters) * 100).toFixed(1) : 0;
 
         res.json({
             results,
             totalVotes,
-            totalVoters: 0,
-            turnoutPercent: 0,
+            totalVoters,
+            turnoutPercent: Number(turnoutPercent),
         });
     } catch (err) {
         console.error("getResults error:", err);

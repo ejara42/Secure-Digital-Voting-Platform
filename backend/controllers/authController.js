@@ -121,16 +121,9 @@ exports.forgotPassword = async (req, res) => {
         const resetURL =
             `${process.env.FRONTEND_URL}/reset-password?token=${token}&id=${voter._id}`;
 
-        const transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS,
-            },
-        });
-
-        await transporter.sendMail({
-            from: `"Election System" <${process.env.EMAIL_USER}>`,
+        const { sendEmail } = require("../utils/email");
+        
+        await sendEmail({
             to: voter.email,
             subject: "Password Reset",
             html: `

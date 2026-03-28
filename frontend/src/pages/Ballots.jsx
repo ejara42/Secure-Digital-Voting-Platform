@@ -262,33 +262,47 @@ export default function BallotList() {
                       </div>
                     </div>
 
-                    {/* Action Button - ALWAYS CLICKABLE */}
-                    <motion.button
-                      onClick={() => handleBallotClick(ballot._id, ballot.status || 'active')}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className={`w-full py-3 rounded-xl text-white font-semibold flex items-center justify-center gap-3 hover:shadow-xl transition-all group/btn ${ballot.status === 'active'
-                        ? 'bg-gradient-to-r from-blue-600 to-purple-600'
-                        : 'bg-gradient-to-r from-gray-700 to-gray-800'
-                        }`}
-                    >
-                      {ballot.status === 'active' ? (
-                        <>
-                          <span>Enter Voting Booth</span>
-                          <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
-                        </>
-                      ) : ballot.status === 'upcoming' ? (
-                        <>
-                          <Clock className="w-5 h-5" />
-                          <span>View Election (Upcoming)</span>
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle className="w-5 h-5" />
-                          <span>View Election Results</span>
-                        </>
+                    {/* Action Buttons */}
+                    <div className="flex flex-col gap-3">
+                      <motion.button
+                        onClick={() => handleBallotClick(ballot._id, ballot.status || 'active')}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className={`w-full py-3 rounded-xl text-white font-semibold flex items-center justify-center gap-3 hover:shadow-xl transition-all group/btn ${ballot.status === 'active'
+                          ? 'bg-gradient-to-r from-blue-600 to-purple-600'
+                          : 'bg-gradient-to-r from-gray-700 to-gray-800'
+                          }`}
+                      >
+                        {ballot.status === 'active' ? (
+                          <>
+                            <span>Enter Voting Booth</span>
+                            <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
+                          </>
+                        ) : ballot.status === 'upcoming' ? (
+                          <>
+                            <Clock className="w-5 h-5" />
+                            <span>View Election (Upcoming)</span>
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle className="w-5 h-5" />
+                            <span>View Candidates</span>
+                          </>
+                        )}
+                      </motion.button>
+
+                      {(ballot.status === 'active' || ballot.status === 'completed') && (
+                        <motion.button
+                          onClick={() => navigate(`/results/${ballot._id}`)}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold flex items-center justify-center gap-3 hover:shadow-xl transition-all"
+                        >
+                          <TrendingUp className="w-5 h-5" />
+                          <span>View Live Results</span>
+                        </motion.button>
                       )}
-                    </motion.button>
+                    </div>
                   </div>
 
                   {/* Status Indicator Bar */}

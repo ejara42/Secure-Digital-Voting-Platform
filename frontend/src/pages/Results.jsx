@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { getResults } from "../api/api";
 import { io } from "socket.io-client";
 import { Pie, Bar } from "react-chartjs-2";
@@ -46,8 +46,10 @@ const SOCKET_URL =
 
 export default function Results() {
   const { ballotId } = useParams();
+  const navigate = useNavigate();
 
   const [results, setResults] = useState([]);
+  const [ballots, setBallots] = useState([]);
   const [stats, setStats] = useState({
     totalVotes: 0,
     totalVoters: 0,
@@ -56,6 +58,22 @@ export default function Results() {
   const [loading, setLoading] = useState(true);
   const [socketConnected, setSocketConnected] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
+
+  useEffect(() => {
+    if (ballotId) return;
+    
+    const fetchBallots = async () => {
+      try {
+        const res = await API.get("/ballots");
+        setBallots(res.data);
+      } catch (err) {
+        console.error("Failed to fetch ballots:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBallots();
+  }, [ballotId]);
 
   useEffect(() => {
     if (!ballotId) {
@@ -187,11 +205,43 @@ export default function Results() {
 
   if (!ballotId) {
     return (
-      <div className="min-h-screen bg-white p-6 flex items-center justify-center">
-        <div className="text-center">
-          <AlertCircle className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">No Ballot Selected</h1>
-          <p className="text-gray-600">Please select a ballot to view election results.</p>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900/20 to-gray-950 p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <Trophy className="w-16 h-16 mx-auto text-yellow-400 mb-4" />
+            <h1 className="text-4xl font-bold text-white mb-2">Election Results</h1>
+            <p className="text-gray-400">Select an election below to view live results and statistics.</p>
+          </div>
+
+          <div className="grid gap-4">
+            {ballots.length === 0 && !loading ? (
+              <div className="bg-gray-900/50 backdrop-blur-xl p-8 rounded-3xl border border-gray-700/50 text-center">
+                <AlertCircle className="w-12 h-12 mx-auto text-gray-500 mb-4" />
+                <p className="text-gray-400 font-medium">No elections found.</p>
+              </div>
+            ) : (
+              ballots.map((ballot) => (
+                <motion.div
+                  key={ballot._id}
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  onClick={() => navigate(`/results/${ballot._id}`)}
+                  className="bg-gray-900/50 backdrop-blur-xl p-6 rounded-2xl border border-gray-700/50 hover:border-blue-500/50 cursor-pointer flex items-center justify-between transition-all"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-blue-500/20 rounded-xl">
+                      <BarChart3 className="w-6 h-6 text-blue-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-white">{ballot.title}</h3>
+                      <p className="text-sm text-gray-400 capitalize">{ballot.status} • {new Date(ballot.endDate).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-gray-500" />
+                </motion.div>
+              ))
+            )}
+          </div>
         </div>
       </div>
     );
