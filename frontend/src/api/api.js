@@ -4,7 +4,7 @@ import axios from "axios";
    AXIOS INSTANCE
 ====================================== */
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
+  baseURL: import.meta.env.VITE_API_URL || "https://secure-digital-voting-platform.onrender.com/api",
   withCredentials: true,
 });
 
