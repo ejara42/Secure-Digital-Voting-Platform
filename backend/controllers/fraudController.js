@@ -1,5 +1,5 @@
 // backend/controllers/fraudController.js
-const Vote = require('../models/vote');
+const Vote = require('../models/Vote');
 const AuditLog = require('../models/AuditLog');
 
 const suspiciousVoters = async (req, res) => {

@@ -14,7 +14,7 @@ const Voter = require('../../models/Voter');
 const Ballot = require('../../models/Ballot');
 const Candidate = require('../../models/Candidate');
 const Otp = require('../../models/Otp');
-const Vote = require('../../models/vote');
+const Vote = require('../../models/Vote');
 const AuditLog = require('../../models/AuditLog');
 
 describe('Integration: Vote flow', () => {

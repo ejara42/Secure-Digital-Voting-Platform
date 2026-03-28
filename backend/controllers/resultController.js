@@ -1,4 +1,4 @@
-const Vote = require("../models/vote");
+const Vote = require("../models/Vote");
 const mongoose = require("mongoose");
 
 // GET /api/results/:ballotId

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const auth = require("../middleware/authMiddleware");
-const Vote = require("../models/vote");
+const Vote = require("../models/Vote");
 const {
     castVote,
     checkVoteStatus,

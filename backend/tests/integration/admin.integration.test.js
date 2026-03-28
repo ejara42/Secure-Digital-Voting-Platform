@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
 // ensure JWT secret matches auth middleware default
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'SECRET123';
 
-const Voter = require('../../models/voter');
+const Voter = require('../../models/Voter');
 const AuditLog = require('../../models/AuditLog');
 
 describe('Admin audit export', () => {
