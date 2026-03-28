@@ -15,15 +15,11 @@ describe('Admin audit export', () => {
   let mongo;
 
   beforeAll(async () => {
-    mongo = await MongoMemoryServer.create({ instance: { dbName: 'test' } });
-    const uri = mongo.getUri();
-    await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
     app = createApp();
   });
 
   afterAll(async () => {
-    await mongoose.disconnect();
-    if (mongo) await mongo.stop();
+    // handled by integrationSetup
   });
 
   test('admin can export audits as NDJSON', async () => {
@@ -35,7 +31,7 @@ describe('Admin audit export', () => {
     await AuditLog.create({ event: 'TEST1', actor: admin._id, meta: { a: 1 } });
     await AuditLog.create({ event: 'TEST2', actor: admin._id, meta: { b: 2 } });
 
-    const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET || 'testsecret');
+    const token = jwt.sign({ id: admin._id, role: 'admin' }, process.env.JWT_SECRET || 'testsecret');
 
     const res = await request(app)
       .get('/api/admin/audit/export')

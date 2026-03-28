@@ -30,6 +30,7 @@ import {
   AlertCircle,
   FileSpreadsheet,
   Percent,
+  ArrowRight,
 } from "lucide-react";
 
 ChartJS.register(
