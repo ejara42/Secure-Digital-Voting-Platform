@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getResults } from "../api/api";
+import API, { getResults } from "../api/api";
 import { io } from "socket.io-client";
 import { Pie, Bar } from "react-chartjs-2";
 import {
