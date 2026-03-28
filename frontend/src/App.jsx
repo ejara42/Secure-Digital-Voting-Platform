@@ -9,7 +9,7 @@ import Home from "./pages/home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Ballots from "./pages/Ballots";
-import Vote from "./pages/Vote";
+import Vote from "./pages/vote";
 import Candidates from "./pages/Candidates";
 import Results from "./pages/Results";
 import ForgotPassword from "./pages/ForgotPassword";
