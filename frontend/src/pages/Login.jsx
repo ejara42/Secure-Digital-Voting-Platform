@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "../api/api";
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -41,7 +41,7 @@ export default function Login() {
 
     setLoading(true);
     try {
-      const res = await axios.post("https://secure-digital-voting-platform.onrender.com/api/auth/login", {
+      const res = await API.post("/auth/login", {
         identifier: id.trim(),
         password: pass.trim(),
       });
