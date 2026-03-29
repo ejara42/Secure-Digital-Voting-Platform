@@ -88,7 +88,7 @@ export default function Candidates() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900/20 to-gray-950 p-4 md:p-8 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 p-4 md:p-8 relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 opacity-5" style={{

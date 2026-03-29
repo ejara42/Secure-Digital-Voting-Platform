@@ -148,7 +148,7 @@ export default function VoterRegister() {
        UI
     ====================================== */
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900/20 to-gray-900 overflow-hidden relative">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 overflow-hidden relative">
             {/* Animated Background Elements */}
             <div className="absolute inset-0 z-0">
                 {/* Grid pattern */}

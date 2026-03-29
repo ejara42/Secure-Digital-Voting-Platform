@@ -91,7 +91,7 @@ export default function Vote() { // Component name stays same
 
   if (checking) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-blue-900/20 to-gray-950">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200">
         <div className="text-center space-y-6">
           <div className="relative">
             <motion.div
@@ -126,7 +126,7 @@ export default function Vote() { // Component name stays same
 
   if (alreadyVoted && !receipt) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-red-900/20 to-gray-950 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 p-4">
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -164,7 +164,7 @@ export default function Vote() { // Component name stays same
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-blue-900/20 to-gray-950 p-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 p-4 relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 opacity-5" style={{

@@ -198,7 +198,7 @@ export default function Results() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200">
         <BarChart3 className="w-16 h-16 animate-spin text-blue-500" />
       </div>
     );
@@ -206,19 +206,19 @@ export default function Results() {
 
   if (!ballotId) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900/20 to-gray-950 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 p-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <Trophy className="w-16 h-16 mx-auto text-yellow-400 mb-4" />
-            <h1 className="text-4xl font-bold text-white mb-2">Election Results</h1>
-            <p className="text-gray-400">Select an election below to view live results and statistics.</p>
+            <Trophy className="w-16 h-16 mx-auto text-yellow-500 mb-4" />
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">Election Results</h1>
+            <p className="text-gray-600">Select an election below to view live results and statistics.</p>
           </div>
 
           <div className="grid gap-4">
             {ballots.length === 0 && !loading ? (
-              <div className="bg-gray-900/50 backdrop-blur-xl p-8 rounded-3xl border border-gray-700/50 text-center">
-                <AlertCircle className="w-12 h-12 mx-auto text-gray-500 mb-4" />
-                <p className="text-gray-400 font-medium">No elections found.</p>
+              <div className="bg-white/80 backdrop-blur-sm p-8 rounded-3xl border border-gray-300 shadow-lg text-center">
+                <AlertCircle className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                <p className="text-gray-500 font-medium">No elections found.</p>
               </div>
             ) : (
               ballots.map((ballot) => (
@@ -227,18 +227,18 @@ export default function Results() {
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
                   onClick={() => navigate(`/results/${ballot._id}`)}
-                  className="bg-gray-900/50 backdrop-blur-xl p-6 rounded-2xl border border-gray-700/50 hover:border-blue-500/50 cursor-pointer flex items-center justify-between transition-all"
+                  className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl border border-gray-300 hover:border-blue-500 cursor-pointer flex items-center justify-between transition-all shadow-md hover:shadow-lg"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="p-3 bg-blue-500/20 rounded-xl">
-                      <BarChart3 className="w-6 h-6 text-blue-400" />
+                    <div className="p-3 bg-blue-50 rounded-xl">
+                      <BarChart3 className="w-6 h-6 text-blue-600" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-white">{ballot.title}</h3>
-                      <p className="text-sm text-gray-400 capitalize">{ballot.status} • {new Date(ballot.endDate).toLocaleDateString()}</p>
+                      <h3 className="text-xl font-bold text-gray-900">{ballot.title}</h3>
+                      <p className="text-sm text-gray-500 capitalize">{ballot.status} • {new Date(ballot.endDate).toLocaleDateString()}</p>
                     </div>
                   </div>
-                  <ArrowRight className="w-5 h-5 text-gray-500" />
+                  <ArrowRight className="w-5 h-5 text-gray-400" />
                 </motion.div>
               ))
             )}
@@ -249,20 +249,20 @@ export default function Results() {
   }
 
   return (
-    <div className="min-h-screen bg-white p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 p-6">
       <div className="max-w-7xl mx-auto space-y-8">
 
         {/* HEADER */}
         <div className="text-center">
-          <Trophy className="w-12 h-12 mx-auto text-yellow-400" />
-          <h1 className="text-4xl font-bold text-gray-800 mt-2">
+          <Trophy className="w-12 h-12 mx-auto text-yellow-500" />
+          <h1 className="text-4xl font-bold text-gray-900 mt-2">
             Live Election Results
           </h1>
-          <p className="text-gray-600">
-            {socketConnected ? "Real-time connected" : "Offline"}
+          <p className="text-gray-500">
+            {socketConnected ? "🟢 Real-time connected" : "🔴 Offline"}
           </p>
           {lastUpdated && (
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-400">
               Updated: {lastUpdated.toLocaleTimeString()}
             </p>
           )}
@@ -287,7 +287,7 @@ export default function Results() {
         </div>
 
         {/* TABLE */}
-        <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-200 shadow-md">
           <div className="flex justify-between mb-4">
             <h2 className="text-xl font-bold text-gray-800">Detailed Results</h2>
             <button
@@ -353,7 +353,7 @@ export default function Results() {
 function StatCard({ icon, label, value }) {
   const Icon = icon;
   return (
-    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
+    <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-md flex items-center gap-4">
       <Icon className="w-8 h-8 text-blue-500" />
       <div>
         <div className="text-2xl font-bold text-gray-900">{value}</div>
@@ -365,7 +365,7 @@ function StatCard({ icon, label, value }) {
 
 function ChartCard({ title, children }) {
   return (
-    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+    <div className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border border-gray-200 shadow-md">
       <h3 className="text-gray-800 font-bold mb-4">{title}</h3>
       <div className="h-72">{children}</div>
     </div>
