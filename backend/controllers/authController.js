@@ -152,9 +152,16 @@ exports.forgotPassword = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("FORGOT PASSWORD ERROR:", error);
+        // 🔴 CRITICAL: Log actual error to help debugging on Render/Vercel logs
+        console.error("FORGOT PASSWORD ERROR LOG:", {
+            message: error.message,
+            stack: error.stack,
+            identifier: req.body.identifier,
+        });
+
         return res.status(500).json({
             message: "Unable to process request",
+            error: process.env.NODE_ENV === "development" ? error.message : undefined,
         });
     }
 };
@@ -190,9 +197,21 @@ exports.resetPassword = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("RESET PASSWORD ERROR:", error);
+        // 🔴 CRITICAL: Log actual error
+        console.error("RESET PASSWORD ERROR LOG:", {
+            message: error.message,
+            stack: error.stack,
+            userId: req.body.userId,
+        });
+
+        // Handle malformed ObjectId errors gracefully
+        if (error.name === "CastError") {
+            return res.status(400).json({ message: "Invalid user ID format" });
+        }
+
         return res.status(500).json({
             message: "Unable to reset password",
+            error: process.env.NODE_ENV === "development" ? error.message : undefined,
         });
     }
 };

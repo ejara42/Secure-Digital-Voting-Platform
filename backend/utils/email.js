@@ -16,15 +16,18 @@ if (!EMAIL_HOST || !EMAIL_USER || !EMAIL_PASS) {
 
 const transporter = nodemailer.createTransport({
     host: EMAIL_HOST,
-    port: Number(EMAIL_PORT),
+    port: Number(EMAIL_PORT || 587),
     secure: EMAIL_SECURE === "true",
-    auth: EMAIL_USER && EMAIL_PASS ? {
+    auth: (EMAIL_USER && EMAIL_PASS) ? {
         user: EMAIL_USER,
         pass: EMAIL_PASS,
     } : undefined,
     pool: true,
     maxConnections: 5,
-    tls: { rejectUnauthorized: true },
+    socketTimeout: 5000, // 5 seconds to prevent hanging
+    tls: { 
+        rejectUnauthorized: false // Often needed for various SMTP providers
+    },
 });
 
 if (NODE_ENV !== "test" && EMAIL_HOST) {
@@ -59,8 +62,13 @@ async function sendEmail({ to, subject, html }) {
         console.log("✅ Email sent to:", to, "| MessageId:", info.messageId);
         return info;
     } catch (error) {
-        console.error("❌ Failed to send email to:", to);
-        console.error("Error Detail:", error.message);
+        console.error("📧 EMAIL SEND ERROR:", {
+            to,
+            subject,
+            error: error.message,
+            code: error.code,
+            command: error.command
+        });
         throw error; // Re-throw so the controller can handle it if needed
     }
 }
